@@ -43,7 +43,7 @@ export default function Home() {
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline">
-              Aadhar Assist AI
+              GovScheme AI - Eligibility Checker
             </h1>
             <p className="text-lg text-muted-foreground">
               Discover the government schemes you're eligible for. Your personal guide to India's welfare programs, powered by AI.

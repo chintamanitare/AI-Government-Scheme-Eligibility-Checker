@@ -6,7 +6,7 @@ import AppHeader from '@/components/app/header';
 import AppFooter from '@/components/app/footer';
 
 export const metadata: Metadata = {
-  title: 'Aadhar Assist AI',
+  title: 'GovScheme AI - Eligibility Checker',
   description: 'Check your eligibility for Indian government schemes with the power of AI.',
 };
 
