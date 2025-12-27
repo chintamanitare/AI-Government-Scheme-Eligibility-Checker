@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LayoutDashboard, LogOut } from "lucide-react";
+import { GraduationCap, LayoutDashboard, LogOut, Building2 } from "lucide-react";
 import AuthDialog from "./auth-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -51,7 +51,13 @@ export default function AppHeader() {
           </div>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/schemes">
+                <Building2 className="mr-2 h-4 w-4" />
+                Schemes
+              </Link>
+            </Button>
            <Button variant="ghost" asChild>
               <Link href="/scholarships">
                 <GraduationCap className="mr-2 h-4 w-4" />
