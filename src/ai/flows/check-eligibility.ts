@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const CheckEligibilityInputSchema = z.object({
+export const CheckEligibilityInputSchema = z.object({
   age: z.number().describe('The age of the applicant.'),
   income: z.string().describe('The annual income of the applicant in Indian Rupees (₹).'),
   state: z.string().describe('The state of the applicant.'),
@@ -14,7 +14,7 @@ const CheckEligibilityInputSchema = z.object({
 
 export type CheckEligibilityInput = z.infer<typeof CheckEligibilityInputSchema>;
 
-const SchemeSchema = z.object({
+export const SchemeSchema = z.object({
   schemeName: z.string().describe("The name of the government scheme."),
   eligible: z.boolean().describe("Whether the user is eligible for the scheme."),
   priority: z.enum(["High", "Medium", "Low"]).describe("The relevance and benefit ranking for the user."),
@@ -25,7 +25,7 @@ const SchemeSchema = z.object({
   applicationLink: z.string().url().nullable().describe("The official URL to the scheme's application page or portal."),
 });
 
-const CheckEligibilityOutputSchema = z.object({
+export const CheckEligibilityOutputSchema = z.object({
   schemes: z.array(SchemeSchema).describe("A list of relevant government schemes for the user."),
   finalAdvice: z.string().describe("A concluding piece of advice for the user in a friendly, encouraging tone. This should be in the user's selected language."),
 });
@@ -62,11 +62,30 @@ const eligibilityPrompt = ai.definePrompt({
     9.  **Provide Final Advice (in {{{language}}}):** Write a short, encouraging summary. For example, "You are eligible for several key schemes! I recommend starting with the Pradhan Mantri Awas Yojana application first as it has high priority. Make sure you have all your documents ready."
 
     **Crucial Instructions:**
-    - **Language:** All text-based output (explanation, rejectionReason, finalAdvice, schemeName, etc.) MUST be in **{{{language}}}**.
+    - **Language:** All text-based output (explanation, rejectionReason, finalAdvice, etc.) MUST be in **{{{language}}}**.
     - **Tone:** Use simple, citizen-friendly language. Avoid jargon. Behave like a helpful government helpdesk officer.
     - **Format:** Strictly adhere to the JSON output format.
   `,
 });
+
+export const checkEligibilityTool = ai.defineTool(
+    {
+      name: 'checkEligibility',
+      description: 'Checks a user\'s eligibility for government schemes. Use this when the user asks for schemes and has provided all the necessary details.',
+      inputSchema: CheckEligibilityInputSchema,
+      outputSchema: CheckEligibilityOutputSchema,
+    },
+    async (input) => {
+        console.log('checkEligibilityTool input', input);
+      const { output } = await eligibilityPrompt(input);
+      console.log('checkEligibilityTool output', output);
+      if (!output) {
+        throw new Error('Failed to check eligibility');
+      }
+      return output;
+    }
+);
+
 
 export const checkEligibility = ai.defineFlow(
   {
@@ -75,7 +94,6 @@ export const checkEligibility = ai.defineFlow(
     outputSchema: CheckEligibilityOutputSchema,
   },
   async (input) => {
-    const { output } = await eligibilityPrompt(input);
-    return output!;
+    return checkEligibilityTool(input);
   }
 );

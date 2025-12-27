@@ -11,17 +11,60 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Bot, Loader2, MessageSquare, Send, User, X } from 'lucide-react';
-import { getChatbotResponse } from '@/app/actions';
+import { getChatbotResponse, type AskChatbotOutput } from '@/app/actions';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import type { FindScholarshipsOutput } from '@/ai/flows/find-scholarships';
+import type { CheckEligibilityOutput } from '@/ai/flows/check-eligibility';
+import ScholarshipCard from './scholarship-card';
+import SchemeCard from './scheme-card';
 
 type Message = {
-  role: 'user' | 'model';
-  content: string;
+  role: 'user' | 'model' | 'tool';
+  content: string | any; // Can be string or tool response
 };
+
+const renderToolResponse = (response: AskChatbotOutput['toolResponse']) => {
+  if (!response) return null;
+  
+  if ('scholarships' in response) {
+    const scholarshipResponse = response as FindScholarshipsOutput;
+    return (
+      <div className="space-y-4">
+        {scholarshipResponse.finalAdvice && (
+          <p className="text-sm p-3 bg-primary/10 rounded-md">
+            <ReactMarkdown>{scholarshipResponse.finalAdvice}</ReactMarkdown>
+          </p>
+        )}
+        {scholarshipResponse.scholarships.map((scholarship, index) => (
+          <ScholarshipCard key={index} scholarship={scholarship} />
+        ))}
+      </div>
+    );
+  }
+
+  if ('schemes' in response) {
+    const schemeResponse = response as CheckEligibilityOutput;
+    return (
+      <div className="space-y-4">
+        {schemeResponse.finalAdvice && (
+          <p className="text-sm p-3 bg-primary/10 rounded-md">
+            <ReactMarkdown>{schemeResponse.finalAdvice}</ReactMarkdown>
+          </p>
+        )}
+        {schemeResponse.schemes.map((scheme, index) => (
+          <SchemeCard key={index} scheme={scheme} />
+        ))}
+      </div>
+    );
+  }
+  
+  return null;
+}
+
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -46,7 +89,7 @@ export default function Chatbot() {
     if (!input.trim()) return;
   
     const userMessage: Message = { role: 'user', content: input };
-    const newMessages = [...messages, userMessage];
+    const newMessages: Message[] = [...messages, userMessage];
   
     setMessages(newMessages);
     setInput('');
@@ -57,18 +100,32 @@ export default function Chatbot() {
   
     const chatbotResponse = await getChatbotResponse({
       query: input,
-      history: newMessages,
+      history: newMessages.map(m => ({
+          ...m,
+          // Stringify tool content for history
+          content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+      })),
     });
       
     setIsLoading(false);
+
+    let finalMessages = [...newMessages];
   
     if (chatbotResponse.error) {
       const errorMessage: Message = { role: 'model', content: chatbotResponse.error };
-      setMessages((prev) => [...prev, errorMessage]);
+      finalMessages.push(errorMessage);
     } else {
-      const modelMessage: Message = { role: 'model', content: chatbotResponse.response };
-      setMessages((prev) => [...prev, modelMessage]);
+        if(chatbotResponse.response) {
+            const modelMessage: Message = { role: 'model', content: chatbotResponse.response };
+            finalMessages.push(modelMessage);
+        }
+        if (chatbotResponse.toolResponse) {
+            const toolMessage: Message = { role: 'tool', content: chatbotResponse.toolResponse };
+            finalMessages.push(toolMessage);
+        }
     }
+    setMessages(finalMessages);
+
      // Give a small delay for the model message to render before scrolling
     setTimeout(scrollToBottom, 100);
   };
@@ -86,7 +143,7 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed bottom-24 right-4 z-50 w-[90vw] max-w-md"
+            className="fixed bottom-24 right-4 z-50 w-[90vw] max-w-lg"
           >
             <Card className="shadow-2xl">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -94,7 +151,7 @@ export default function Chatbot() {
                   <Bot className="h-7 w-7 text-primary" />
                   <div>
                     <CardTitle>AI Assistant</CardTitle>
-                    <CardDescription>Ask me about schemes</CardDescription>
+                    <CardDescription>Ask me about schemes & scholarships</CardDescription>
                   </div>
                 </div>
                 <Button
@@ -105,7 +162,7 @@ export default function Chatbot() {
                   <X className="h-5 w-5" />
                 </Button>
               </CardHeader>
-              <CardContent className="h-[400px] flex flex-col">
+              <CardContent className="h-[500px] flex flex-col">
                 <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
                   <div className="space-y-4">
                     {messages.map((message, index) => (
@@ -118,8 +175,8 @@ export default function Chatbot() {
                             : 'justify-start'
                         )}
                       >
-                        {message.role === 'model' && (
-                          <Avatar className="h-8 w-8">
+                        {message.role !== 'user' && (
+                          <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarFallback>
                               <Bot className="h-5 w-5" />
                             </AvatarFallback>
@@ -127,18 +184,22 @@ export default function Chatbot() {
                         )}
                         <div
                           className={cn(
-                            'rounded-lg p-3 text-sm max-w-[80%]',
+                            'rounded-lg p-3 text-sm max-w-[85%]',
                             message.role === 'user'
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted'
                           )}
                         >
-                          <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
+                          {message.role === 'tool' ? (
+                            renderToolResponse(message.content)
+                          ) : (
+                            <div className="prose prose-sm max-w-none prose-p:my-2">
+                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                            </div>
+                          )}
                         </div>
                          {message.role === 'user' && (
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarFallback>
                               <User className="h-5 w-5" />
                             </AvatarFallback>

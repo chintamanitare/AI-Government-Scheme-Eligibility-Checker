@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const FindScholarshipsInputSchema = z.object({
+export const FindScholarshipsInputSchema = z.object({
   age: z.number().describe('The age of the applicant.'),
   income: z.string().describe('The annual family income of the applicant in Indian Rupees (₹).'),
   state: z.string().describe('The state of domicile for the applicant.'),
@@ -14,7 +14,7 @@ const FindScholarshipsInputSchema = z.object({
 
 export type FindScholarshipsInput = z.infer<typeof FindScholarshipsInputSchema>;
 
-const ScholarshipSchema = z.object({
+export const ScholarshipSchema = z.object({
   scholarshipName: z.string().describe("The name of the scholarship."),
   provider: z.string().describe("The organization or platform providing the scholarship (e.g., Buddy4Study, MahaDBT, National Scholarship Portal)."),
   eligible: z.boolean().describe("Whether the user is likely eligible based on the provided details."),
@@ -23,7 +23,7 @@ const ScholarshipSchema = z.object({
   applicationLink: z.string().url().nullable().describe("The direct official URL to the scholarship's application page or portal."),
 });
 
-const FindScholarshipsOutputSchema = z.object({
+export const FindScholarshipsOutputSchema = z.object({
   scholarships: z.array(ScholarshipSchema).describe("A list of 3-5 relevant scholarships for the student."),
   finalAdvice: z.string().describe("A concluding piece of advice for the student in a friendly, encouraging tone. This should be in the user's selected language."),
 });
@@ -69,6 +69,25 @@ const scholarshipPrompt = ai.definePrompt({
   `,
 });
 
+export const findScholarshipsTool = ai.defineTool(
+    {
+      name: 'findScholarships',
+      description: 'Finds relevant scholarships for a student based on their profile. Use this when the user asks for scholarships and has provided all the necessary details.',
+      inputSchema: FindScholarshipsInputSchema,
+      outputSchema: FindScholarshipsOutputSchema,
+    },
+    async (input) => {
+      console.log('findScholarshipsTool input', input);
+      const { output } = await scholarshipPrompt(input);
+      console.log('findScholarshipsTool output', output);
+      if (!output) {
+        throw new Error('Failed to find scholarships');
+      }
+      return output;
+    }
+);
+
+
 export const findScholarships = ai.defineFlow(
   {
     name: 'findScholarshipsFlow',
@@ -76,7 +95,6 @@ export const findScholarships = ai.defineFlow(
     outputSchema: FindScholarshipsOutputSchema,
   },
   async (input) => {
-    const { output } = await scholarshipPrompt(input);
-    return output!;
+    return findScholarshipsTool(input);
   }
 );
