@@ -88,7 +88,7 @@ export const findScholarshipsTool = ai.defineTool(
 );
 
 
-export const findScholarships = ai.defineFlow(
+const findScholarshipsFlow = ai.defineFlow(
   {
     name: 'findScholarshipsFlow',
     inputSchema: FindScholarshipsInputSchema,
@@ -98,3 +98,7 @@ export const findScholarships = ai.defineFlow(
     return findScholarshipsTool(input);
   }
 );
+
+export async function findScholarships(input: FindScholarshipsInput): Promise<FindScholarshipsOutput> {
+  return findScholarshipsFlow(input);
+}
