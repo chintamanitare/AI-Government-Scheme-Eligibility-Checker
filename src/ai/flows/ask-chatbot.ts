@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,8 +11,28 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { findScholarshipsTool, FindScholarshipsOutputSchema } from './find-scholarships';
+import { FindScholarshipsInputSchema, FindScholarshipsOutputSchema } from './find-scholarships';
 import { checkEligibilityTool, CheckEligibilityOutputSchema } from './check-eligibility';
+
+const findScholarshipsTool = ai.defineTool(
+  {
+    name: 'findScholarships',
+    description: 'Finds relevant scholarships for a student based on their profile. Use this when the user asks for scholarships and has provided all the necessary details.',
+    inputSchema: FindScholarshipsInputSchema,
+    outputSchema: FindScholarshipsOutputSchema,
+  },
+  async (input) => {
+    console.log('findScholarshipsTool input', input);
+    // Directly call the underlying prompt/flow logic for scholarships
+    const { findScholarships } = await import('./find-scholarships');
+    const output = await findScholarships(input);
+    console.log('findScholarshipsTool output', output);
+    if (!output) {
+      throw new Error('Failed to find scholarships');
+    }
+    return output;
+  }
+);
 
 const AskChatbotInputSchema = z.object({
   query: z.string().describe("The user's question."),
@@ -55,7 +76,7 @@ const askChatbotFlow = ai.defineFlow(
         prompt: query,
         history: history,
         tools: [findScholarshipsTool, checkEligibilityTool],
-        system: `You are a helpful and friendly AI assistant for "Government Scheme & Scholarship Checker", a platform that helps Indian citizens understand and apply for government welfare schemes and student scholarships. Your goal is to answer user questions accurately and concisely.
+        system: `You are a helpful and friendly AI assistant for "Aadhar Assist AI", a platform that helps Indian citizens understand and apply for government welfare schemes and student scholarships. Your goal is to answer user questions accurately and concisely.
 
         **Persona:**
         - Your persona is that of a knowledgeable and patient government helpdesk officer.

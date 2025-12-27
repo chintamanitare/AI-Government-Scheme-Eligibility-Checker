@@ -1,3 +1,4 @@
+
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -69,35 +70,21 @@ const scholarshipPrompt = ai.definePrompt({
   `,
 });
 
-export const findScholarshipsTool = ai.defineTool(
-    {
-      name: 'findScholarships',
-      description: 'Finds relevant scholarships for a student based on their profile. Use this when the user asks for scholarships and has provided all the necessary details.',
-      inputSchema: FindScholarshipsInputSchema,
-      outputSchema: FindScholarshipsOutputSchema,
-    },
-    async (input) => {
-      console.log('findScholarshipsTool input', input);
-      const { output } = await scholarshipPrompt(input);
-      console.log('findScholarshipsTool output', output);
-      if (!output) {
-        throw new Error('Failed to find scholarships');
-      }
-      return output;
-    }
-);
-
-
 const findScholarshipsFlow = ai.defineFlow(
   {
-    name: 'findScholarshipsFlow',
+    name: 'findScholarshipsFlowInternal',
     inputSchema: FindScholarshipsInputSchema,
     outputSchema: FindScholarshipsOutputSchema,
   },
   async (input) => {
-    return findScholarshipsTool(input);
+    const { output } = await scholarshipPrompt(input);
+    if (!output) {
+      throw new Error('Failed to find scholarships');
+    }
+    return output;
   }
 );
+
 
 export async function findScholarships(input: FindScholarshipsInput): Promise<FindScholarshipsOutput> {
   return findScholarshipsFlow(input);
