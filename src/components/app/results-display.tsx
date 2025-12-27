@@ -114,23 +114,25 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
             </div>
           )}
 
-          {eligibleSchemes.length > 0 && (
-            <div className='space-y-4'>
-              <h3 className="text-xl font-bold text-green-600">Eligible Schemes ({eligibleSchemes.length})</h3>
-              {eligibleSchemes.map((scheme, index) => (
-                <SchemeCard key={index} scheme={scheme} />
-              ))}
-            </div>
-          )}
+          <div className="space-y-6">
+            {eligibleSchemes.length > 0 && (
+              <div className='space-y-4'>
+                <h3 className="text-xl font-bold text-green-600">Eligible Schemes ({eligibleSchemes.length})</h3>
+                {eligibleSchemes.map((scheme, index) => (
+                  <SchemeCard key={index} scheme={scheme} />
+                ))}
+              </div>
+            )}
 
-          {notEligibleSchemes.length > 0 && (
-            <div className='mt-8 space-y-4'>
-              <h3 className="text-xl font-bold text-muted-foreground">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
-              {notEligibleSchemes.map((scheme, index) => (
-                <SchemeCard key={index} scheme={scheme} />
-              ))}
-            </div>
-          )}
+            {notEligibleSchemes.length > 0 && (
+              <div className='mt-8 space-y-4'>
+                <h3 className="text-xl font-bold text-muted-foreground">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
+                {notEligibleSchemes.map((scheme, index) => (
+                  <SchemeCard key={index} scheme={scheme} />
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
