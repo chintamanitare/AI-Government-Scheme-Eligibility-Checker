@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getAuth, signOut } from "firebase/auth";
+import ClientOnly from "../client-only";
 
 const AshokaChakraIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -46,10 +47,12 @@ export default function AppHeader() {
       <div className="container flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-primary">
           <AshokaChakraIcon className="h-8 w-8 flex-shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-base font-bold font-headline leading-tight">Government Scheme &</span>
-              <span className="text-base font-bold font-headline leading-tight">Scholarship Checker</span>
-            </div>
+            <ClientOnly>
+              <div className="flex flex-col">
+                <span className="text-base font-bold font-headline leading-tight">Government Scheme &</span>
+                <span className="text-base font-bold font-headline leading-tight">Scholarship Checker</span>
+              </div>
+            </ClientOnly>
         </Link>
         
         <div className="flex items-center gap-2">
