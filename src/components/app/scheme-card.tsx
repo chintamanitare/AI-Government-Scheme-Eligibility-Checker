@@ -1,5 +1,5 @@
 import type { Scheme } from '@/app/actions';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, FileText, ListOrdered, MessageSquareQuote, XCircle, ArrowUpRight } from 'lucide-react';
+import { CheckCircle2, FileText, ListOrdered, XCircle, ArrowUpRight, Info } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 
@@ -22,50 +22,51 @@ const PriorityBadge = ({ priority }: { priority: 'High' | 'Medium' | 'Low' }) =>
     Low: 'outline',
   }[priority] as 'default' | 'secondary' | 'outline';
 
-  return <Badge variant={variant} className="border-primary/50">{priority} Priority</Badge>;
+  return <Badge variant={variant}>{priority} Priority</Badge>;
 };
 
 export default function SchemeCard({ scheme }: SchemeCardProps) {
   return (
-    <Card className="bg-card/80 transition-shadow hover:shadow-md hover:border-primary/30 border-border">
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
-        <div className="space-y-1">
-            <CardTitle className="text-lg font-medium">{scheme.schemeName}</CardTitle>
-            <div className="flex items-center gap-2">
-                {scheme.priority && <PriorityBadge priority={scheme.priority} />}
-            </div>
+    <Card className="overflow-hidden transition-shadow duration-300 ease-in-out hover:shadow-lg hover:border-primary/30">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 bg-muted/30">
+        <div className="space-y-1.5">
+          <CardTitle className="text-lg font-semibold">{scheme.schemeName}</CardTitle>
+          <div className="flex items-center gap-2">
+            {scheme.priority && <PriorityBadge priority={scheme.priority} />}
+          </div>
         </div>
         
         {scheme.eligible ? (
-            <span className="flex items-center gap-1.5 text-green-500 font-semibold text-sm">
-                <CheckCircle2 className="h-5 w-5" />
-                Eligible
-            </span>
-            ) : (
-            <span className="flex items-center gap-1.5 text-destructive font-semibold text-sm">
-                <XCircle className="h-5 w-5" />
-                Not Eligible
-            </span>
+          <div className="flex items-center gap-1.5 text-green-600 font-semibold text-sm py-1 px-3 rounded-full bg-green-100">
+            <CheckCircle2 className="h-5 w-5" />
+            Eligible
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-red-600 font-semibold text-sm py-1 px-3 rounded-full bg-red-100">
+            <XCircle className="h-5 w-5" />
+            Not Eligible
+          </div>
         )}
       </CardHeader>
-      <CardContent>
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="explanation">
-            <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
-              <MessageSquareQuote className='mr-2 h-5 w-5 text-primary'/> AI Explanation
-            </AccordionTrigger>
-            <AccordionContent className="prose prose-sm max-w-none text-muted-foreground pl-4 border-l-2 ml-2">
-                {scheme.eligible ? scheme.explanation : scheme.rejectionReason}
-            </AccordionContent>
-          </AccordionItem>
+      <CardContent className="p-6">
+        <div className="mb-6">
+            <h4 className='font-semibold text-base flex items-center mb-2'>
+              <Info className='h-5 w-5 mr-2 text-primary'/>
+              AI Explanation
+            </h4>
+            <p className="text-sm text-muted-foreground pl-7">
+              {scheme.eligible ? scheme.explanation : scheme.rejectionReason}
+            </p>
+        </div>
 
+        <Accordion type="single" collapsible className="w-full" defaultValue='documents'>
           {scheme.documentsRequired && scheme.documentsRequired.length > 0 && (
             <AccordionItem value="documents">
               <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
                 <FileText className='mr-2 h-5 w-5 text-primary'/> Documents Required
               </AccordionTrigger>
-              <AccordionContent className="pl-4 border-l-2 ml-2">
-                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+              <AccordionContent className="pt-2">
+                <ul className="list-disc space-y-2 pl-12 text-muted-foreground text-sm">
                   {scheme.documentsRequired.map((doc, i) => (
                     <li key={i}>{doc}</li>
                   ))}
@@ -79,8 +80,8 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
               <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
                 <ListOrdered className='mr-2 h-5 w-5 text-primary'/> Application Steps
               </AccordionTrigger>
-              <AccordionContent className="pl-4 border-l-2 ml-2">
-                <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
+              <AccordionContent className="pt-2">
+                <ol className="list-decimal space-y-2 pl-12 text-muted-foreground text-sm">
                   {scheme.applicationSteps.map((step, i) => (
                     <li key={i}>{step}</li>
                   ))}
@@ -91,13 +92,13 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
         </Accordion>
       </CardContent>
       {scheme.applicationLink && (
-        <CardFooter className="bg-muted/30 py-3 px-6">
-            <Button asChild className='w-full' size="sm">
-                <Link href={scheme.applicationLink} target="_blank" rel="noopener noreferrer">
-                    Apply Now
-                    <ArrowUpRight className='ml-2 h-4 w-4' />
-                </Link>
-            </Button>
+        <CardFooter className="bg-muted/30 py-3 px-6 border-t">
+          <Button asChild className='w-full' size="sm">
+            <Link href={scheme.applicationLink} target="_blank" rel="noopener noreferrer">
+              Go to Official Website
+              <ArrowUpRight className='ml-2 h-4 w-4' />
+            </Link>
+          </Button>
         </CardFooter>
       )}
     </Card>

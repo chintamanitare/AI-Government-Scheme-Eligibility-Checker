@@ -1,5 +1,5 @@
 import type { EligibilityResponse } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import SchemeCard from './scheme-card';
 import SchemeCardSkeleton from './scheme-card-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
@@ -28,9 +28,9 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
             <FileText className="h-6 w-6" />
             Analyzing Your Profile...
           </CardTitle>
+          <CardDescription>Our AI is finding the best schemes for you. Please wait a moment.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Our AI is finding the best schemes for you. Please wait a moment.</p>
           <SchemeCardSkeleton />
           <SchemeCardSkeleton />
           <SchemeCardSkeleton />
@@ -79,8 +79,9 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
     <div className="space-y-8">
       <Card className="shadow-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
         <CardHeader className="flex flex-row justify-between items-start">
-          <div className='space-y-1.5'>
+          <div>
             <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
+            <CardDescription>Here's what our AI found based on your profile.</CardDescription>
           </div>
           {hasResults && (
             <DropdownMenu>
@@ -104,18 +105,18 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
         </CardHeader>
         <CardContent>
           {result.finalAdvice && (
-            <div className="mb-6 p-4 bg-accent/50 border-l-4 border-primary rounded-r-lg">
+            <div className="mb-8 p-4 bg-primary/10 border-l-4 border-primary rounded-r-lg">
               <p className="font-semibold text-primary flex items-center gap-2">
                 <Award className='h-5 w-5' />
                 AI Advisor's Summary
               </p>
-              <p className="text-foreground/90 mt-1">{result.finalAdvice}</p>
+              <p className="text-foreground/90 mt-2">{result.finalAdvice}</p>
             </div>
           )}
 
           {eligibleSchemes.length > 0 && (
             <div className='space-y-4'>
-              <h3 className="text-xl font-bold text-green-500">Eligible Schemes ({eligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-green-600">Eligible Schemes ({eligibleSchemes.length})</h3>
               {eligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}
@@ -124,7 +125,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
           {notEligibleSchemes.length > 0 && (
             <div className='mt-8 space-y-4'>
-              <h3 className="text-xl font-bold text-muted-foreground/80">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-muted-foreground">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
               {notEligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}

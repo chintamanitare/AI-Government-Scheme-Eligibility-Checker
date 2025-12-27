@@ -65,7 +65,7 @@ export default function SchemesPage() {
           />
         </div>
       </div>
-      <Chatbot />
+      {/* The Chatbot is no longer rendered on this page to improve focus */}
     </div>
   );
 }
