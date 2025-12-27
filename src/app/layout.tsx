@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import AppHeader from '@/components/app/header';
 import AppFooter from '@/components/app/footer';
 import { PT_Sans } from 'next/font/google';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -13,7 +14,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Government Scheme Eligibility Checker',
+  title: 'GovScheme AI - Eligibility Checker',
   description: 'Know your government benefits in seconds.',
 };
 
@@ -25,12 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
-        <div className="relative flex min-h-dvh flex-col">
-          <AppHeader />
-          <main className="flex-1">{children}</main>
-          <AppFooter />
-        </div>
-        <Toaster />
+        <FirebaseClientProvider>
+          <div className="relative flex min-h-dvh flex-col">
+            <AppHeader />
+            <main className="flex-1">{children}</main>
+            <AppFooter />
+          </div>
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
