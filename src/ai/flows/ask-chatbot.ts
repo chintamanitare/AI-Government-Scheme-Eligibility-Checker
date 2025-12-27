@@ -60,19 +60,19 @@ const askChatbotFlow = ai.defineFlow(
         
         - **For Government Schemes:** If the user asks about schemes without providing details, respond with:
         "I can definitely help with that! To check which government schemes you might be eligible for, could you please tell me a few details?
-        - Your Age
-        - Your State
-        - Your annual household income
-        - Your social category (e.g., General, SC, ST, OBC)
-        - Your occupation"
+        1. Your Age
+        2. Your State
+        3. Your annual household income
+        4. Your social category (e.g., General, SC, ST, OBC)
+        5. Your occupation"
 
         - **For Scholarships:** If the user asks about scholarships without providing details, respond with:
         "I can definitely help you find scholarships! To find the best options for you, could you please provide a few details?
-        - Your Age
-        - The course you are studying (e.g., 12th Class, B.A., M.Sc.)
-        - Your annual family income
-        - Your state of residence
-        - Your social category (e.g., General, SC, ST, OBC)"
+        1. Your Age
+        2. The course you are studying (e.g., 12th Class, B.A., M.Sc.)
+        3. Your annual family income
+        4. Your state of residence
+        5. Your social category (e.g., General, SC, ST, OBC)"
         `,
       });
       const textResponse = response.text;
