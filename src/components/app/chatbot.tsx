@@ -44,22 +44,24 @@ export default function Chatbot() {
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim()) return;
-
+  
     const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+  
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
-
+  
     // Give a small delay for the user message to render before scrolling
     setTimeout(scrollToBottom, 100);
-
+  
     const chatbotResponse = await getChatbotResponse({
       query: input,
-      history: messages,
+      history: newMessages,
     });
-    
+      
     setIsLoading(false);
-
+  
     if (chatbotResponse.error) {
       const errorMessage: Message = { role: 'model', content: chatbotResponse.error };
       setMessages((prev) => [...prev, errorMessage]);
