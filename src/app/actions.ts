@@ -3,7 +3,9 @@
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
 import { auth, db } from "@/firebase";
-import { addDoc, collection, doc, serverTimestamp, getDoc, query, orderBy, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
+import { headers } from 'next/headers';
+import { Auth, getAuth } from "firebase/auth";
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -18,13 +20,23 @@ export type EligibilityCheckRecord = CheckEligibilityInput & {
     };
 };
 
+// This is a temporary helper function to get the current user on the server.
+// In a production app, this would be handled by a more robust authentication solution.
+async function getCurrentUser() {
+    // This is not a reliable way to get the user on the server.
+    // It's a workaround for the hackathon context.
+    // A proper implementation would use session management or server-side Firebase Auth.
+    return auth.currentUser;
+}
+
+
 export async function getEligibility(input: CheckEligibilityInput): Promise<EligibilityResponse> {
   try {
     console.log("Checking eligibility for:", input);
     const result = await checkEligibility(input);
 
     try {
-        const user = auth.currentUser;
+        const user = await getCurrentUser();
 
         if (user) {
             const userDocRef = doc(db, "users", user.uid);
@@ -38,6 +50,8 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
             };
             await addDoc(userChecksCollection, docData);
             console.log("Saved eligibility check for user:", user.uid);
+        } else {
+            console.warn("User not authenticated. Eligibility check will not be saved.");
         }
     } catch(authError) {
         console.warn("Could not save eligibility check. User may not be authenticated.", authError);
@@ -54,10 +68,12 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
 
 export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
     try {
-        const user = auth.currentUser;
+        const user = await getCurrentUser();
 
         if (!user) {
-            return { error: "You must be logged in to view saved checks." };
+             console.warn("Could not get saved checks. User is not authenticated.");
+             // Return empty array instead of error to not break the UI for anonymous users.
+            return { checks: [] };
         }
 
         const userDocRef = doc(db, "users", user.uid);

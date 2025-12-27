@@ -18,11 +18,10 @@ export default function DashboardPage() {
   const [error, setError] = React.useState<string | null>(null);
 
   const fetchChecks = React.useCallback(async () => {
+    if (!user) return; // Don't fetch if user is not logged in
+
     setIsLoading(true);
     setError(null);
-    setSelectedCheck(null);
-    setChecks([]);
-
     const result = await getSavedChecks();
     if (result.error) {
       setError(result.error);
@@ -31,19 +30,26 @@ export default function DashboardPage() {
       if (result.checks.length > 0) {
         handleSelectCheck(result.checks[0]);
       } else {
+        // If there are no checks, make sure we clear the selected check
         setSelectedCheck(null);
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [user]); // Add user as a dependency
 
   React.useEffect(() => {
-    if (!isUserLoading && user) {
-      fetchChecks();
-    }
-    if (!isUserLoading && !user) {
+    // When user state is resolved
+    if (!isUserLoading) {
+      if (user) {
+        // If user is logged in, fetch their checks
+        fetchChecks();
+      } else {
+        // If no user, stop loading and show sign-in message
         setIsLoading(false);
         setError("Please sign in to view your dashboard.");
+        setChecks([]); // Clear any existing checks
+        setSelectedCheck(null);
+      }
     }
   }, [user, isUserLoading, fetchChecks]);
 
@@ -61,6 +67,10 @@ export default function DashboardPage() {
     if (check.createdAt?.seconds) {
       return format(new Date(check.createdAt.seconds * 1000), 'PPP p');
     }
+    // Handle cases where createdAt might not be a server timestamp yet (local state)
+    if (check.createdAt && !check.createdAt.seconds) {
+      return 'Saving...'
+    }
     return 'Date not available';
   }
 
@@ -71,11 +81,19 @@ export default function DashboardPage() {
       </div>
     );
   }
-
+  
   if (!user) {
      return (
         <div className="container mx-auto px-4 py-8 md:py-12 text-center">
-            <p className='text-destructive'>Please sign in to view your dashboard.</p>
+            <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline mb-4">
+              Your Dashboard
+            </h1>
+            <Card>
+              <CardContent className='p-8'>
+                <p className='text-destructive'>{error || "Please sign in to view your dashboard."}</p>
+                <p className='text-muted-foreground'>Sign in to save and review your eligibility checks.</p>
+              </CardContent>
+            </Card>
         </div>
      )
   }
@@ -97,11 +115,11 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {isLoading && checks.length === 0 ? (
+      {(isLoading && checks.length === 0) ? (
          <div className="flex items-center justify-center h-64">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
          </div>
-      ) : error ? (
+      ) : error && !checks.length ? (
          <div className="text-center">
             <p className='text-destructive'>{error}</p>
         </div>
@@ -125,7 +143,7 @@ export default function DashboardPage() {
                         checks.map(check => (
                             <Button
                                 key={check.id}
-                                variant="outline"
+                                variant={selectedCheck === JSON.parse(check.aiResponse) ? 'secondary' : 'outline'}
                                 className="w-full justify-start text-left h-auto"
                                 onClick={() => handleSelectCheck(check)}
                             >
@@ -144,7 +162,7 @@ export default function DashboardPage() {
             </Card>
             </div>
             <div className="lg:col-span-3">
-                <ResultsDisplay result={selectedCheck} isLoading={isLoading && !!selectedCheck} error={null} />
+                <ResultsDisplay result={selectedCheck} isLoading={isLoading && !!selectedCheck} error={error && !!selectedCheck ? error : null} />
             </div>
         </div>
       )}
