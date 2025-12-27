@@ -11,6 +11,24 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
+// New component to safely render timestamp on the client
+const ClientTimestamp = ({ createdAt }: { createdAt: EligibilityCheckRecord['createdAt'] }) => {
+    const [formattedDate, setFormattedDate] = React.useState<string>('Date not available');
+
+    React.useEffect(() => {
+        if (createdAt?.seconds) {
+            setFormattedDate(format(new Date(createdAt.seconds * 1000), 'PPP p'));
+        } else if (typeof createdAt === 'string') {
+            setFormattedDate(format(new Date(createdAt), 'PPP p'));
+        } else if (createdAt && !createdAt.seconds) {
+            setFormattedDate('Saving...');
+        }
+    }, [createdAt]);
+
+    return <>{formattedDate}</>;
+};
+
+
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
@@ -89,19 +107,6 @@ export default function DashboardPage() {
         fetchChecks(user.uid);
     }
   };
-
-  const renderTimestamp = (check: EligibilityCheckRecord) => {
-    if (check.createdAt?.seconds) {
-      return format(new Date(check.createdAt.seconds * 1000), 'PPP p');
-    }
-    if (typeof check.createdAt === 'string') {
-        return format(new Date(check.createdAt), 'PPP p');
-    }
-    if (check.createdAt && !check.createdAt.seconds) {
-      return 'Saving...'
-    }
-    return 'Date not available';
-  }
 
   if (isUserLoading) {
     return (
@@ -183,7 +188,7 @@ export default function DashboardPage() {
                                         {`Age: ${check.age}, Income: ₹${check.income}`}
                                     </span>
                                     <span className='text-xs text-muted-foreground'>
-                                        {renderTimestamp(check)}
+                                        <ClientTimestamp createdAt={check.createdAt} />
                                     </span>
                                 </div>
                             </Button>
