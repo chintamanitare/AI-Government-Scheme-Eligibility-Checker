@@ -3,7 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SchemeCard from './scheme-card';
 import SchemeCardSkeleton from './scheme-card-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { AlertCircle, FileText } from 'lucide-react';
+import { AlertCircle, FileText, Download, ChevronDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { generatePdf, generateCsv } from '@/lib/report-generator';
 
 interface ResultsDisplayProps {
   result: EligibilityResponse | null;
@@ -55,12 +63,44 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   const eligibleSchemes = result.schemes?.filter(s => s.eligible) || [];
   const notEligibleSchemes = result.schemes?.filter(s => !s.eligible) || [];
+  const hasResults = eligibleSchemes.length > 0 || notEligibleSchemes.length > 0;
+
+
+  const handleDownload = (format: 'pdf' | 'csv') => {
+    if (!result || 'error' in result) return;
+    if (format === 'pdf') {
+      generatePdf(result);
+    } else {
+      generateCsv(result);
+    }
+  };
 
   return (
     <div className="space-y-8">
       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
+        <CardHeader className="flex flex-row justify-between items-start">
+          <div className='space-y-1.5'>
+            <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
+          </div>
+          {hasResults && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                  Download as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDownload('csv')}>
+                  Download as CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </CardHeader>
         <CardContent>
           {result.finalAdvice && (
