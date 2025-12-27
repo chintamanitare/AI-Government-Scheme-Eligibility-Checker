@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Indian flag in the background of a government building",
+      "imageUrl": "https://images.unsplash.com/photo-1646298714297-5e13878336c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxpbmRpYW4lMjBnb3Zlcm5tZW50fGVufDB8fHx8MTc2NjgwOTgxOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian government"
+    }
+  ]
 }

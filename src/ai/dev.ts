@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/generate-application-guide.ts';
+import '@/ai/flows/generate-document-checklist.ts';
+import '@/ai/flows/check-eligibility.ts';
