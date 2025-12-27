@@ -10,13 +10,17 @@ import {initializeApp, getApp, getApps} from 'firebase-admin/app'
 import {ServiceAccount, getServiceAccount} from 'firebase-admin/app'
 
 async function getAuthenticatedUserOnServer() {
-  const anAuth = getAuth(getApp());
+  // This function needs to be implemented correctly based on your auth setup.
+  // For now, it will use a temporary method to try and get the user.
   try {
     const idToken = headers().get('Authorization')?.split('Bearer ')[1]
     if (!idToken) {
       return null;
     }
-    const decodedToken = await anAuth.verifyIdToken(idToken)
+    // This is not the ideal way to do this, but it's a temporary fix.
+    // A better solution would involve a more robust server-side auth check.
+    const adminAuth = getAuth(getApp());
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
     return decodedToken;
   } catch (error) {
     console.error("Error verifying auth token:", error);
@@ -100,10 +104,13 @@ export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord
 export async function getChatbotResponse(input: AskChatbotInput): Promise<AskChatbotOutput> {
   try {
     const result = await askChatbot(input);
+    if (result.error) {
+        console.error("Chatbot flow returned an error:", result.error);
+        return { response: '', error: result.error };
+    }
     return result;
   } catch (e: any) {
     console.error("Error in getChatbotResponse action:", e);
-    const errorMessage = e.message || "An unknown error occurred while getting chatbot response.";
-    return { error: errorMessage };
+    return { response: '', error: "An error occurred while processing your request." };
   }
 }
