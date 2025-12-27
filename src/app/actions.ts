@@ -2,9 +2,10 @@
 
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
-import { db } from "@/firebase";
-import { addDoc, collection, doc, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { initializeServerFirebase } from "@/firebase/server-init";
+import { collection, serverTimestamp, getDocs, query, orderBy, addDoc, doc } from "firebase/firestore";
+
+const { db } = initializeServerFirebase();
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -35,8 +36,7 @@ export async function saveCheck(userId: string, input: CheckEligibilityInput, ai
         return { error: "You must be logged in to save a check." };
     }
     try {
-        const userDocRef = doc(db, "users", userId);
-        const userChecksCollection = collection(userDocRef, "eligibility_checks");
+        const userChecksCollection = collection(db, "users", userId, "eligibility_checks");
         
         const docData = {
             ...input,
@@ -44,11 +44,9 @@ export async function saveCheck(userId: string, input: CheckEligibilityInput, ai
             aiResponse: JSON.stringify(aiResponse),
             createdAt: serverTimestamp(),
         };
+        
+        await addDoc(userChecksCollection, docData);
 
-        // Use non-blocking write
-        addDocumentNonBlocking(userChecksCollection, docData);
-
-        console.log("Queued eligibility check save for user:", userId);
         return { success: true };
 
     } catch(e: any) {
@@ -57,15 +55,13 @@ export async function saveCheck(userId: string, input: CheckEligibilityInput, ai
     }
 }
 
-
 export async function getSavedChecks(userId: string): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
     if (!userId) {
          console.warn("Could not get saved checks. User is not authenticated.");
          return { checks: [] };
     }
     try {
-        const userDocRef = doc(db, "users", userId);
-        const userChecksCollection = collection(userDocRef, "eligibility_checks");
+        const userChecksCollection = collection(db, "users", userId, "eligibility_checks");
         const q = query(userChecksCollection, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
@@ -80,7 +76,6 @@ export async function getSavedChecks(userId: string): Promise<{checks?: Eligibil
         return { error: e.message || "An unknown error occurred." };
     }
 }
-
 
 export async function getChatbotResponse(input: AskChatbotInput): Promise<AskChatbotOutput> {
     try {
