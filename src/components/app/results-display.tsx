@@ -22,7 +22,7 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({ result, isLoading, error }: ResultsDisplayProps) {
   if (isLoading) {
     return (
-      <Card className="shadow-lg border-2 border-primary/10">
+      <Card className="shadow-xl border-2 border-primary/10">
         <CardHeader>
           <CardTitle className="text-primary flex items-center gap-2">
             <FileText className="h-6 w-6" />
@@ -77,7 +77,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-lg border-2 border-primary/10">
+      <Card className="shadow-xl border-2 border-primary/10">
         <CardHeader className="flex flex-row justify-between items-start">
           <div className='space-y-1.5'>
             <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
@@ -104,8 +104,8 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
         </CardHeader>
         <CardContent>
           {result.finalAdvice && (
-            <div className="mb-6 p-4 bg-primary/10 border-l-4 border-primary rounded-r-lg">
-              <p className="font-semibold text-primary-dark flex items-center gap-2">
+            <div className="mb-6 p-4 bg-accent border-l-4 border-primary rounded-r-lg">
+              <p className="font-semibold text-accent-foreground flex items-center gap-2">
                 <Award className='h-5 w-5' />
                 AI Advisor's Summary
               </p>
@@ -115,7 +115,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
           {eligibleSchemes.length > 0 && (
             <div className='space-y-4'>
-              <h3 className="text-xl font-bold text-accent">Eligible Schemes ({eligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-green-700">Eligible Schemes ({eligibleSchemes.length})</h3>
               {eligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}

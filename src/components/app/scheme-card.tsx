@@ -1,5 +1,5 @@
 import type { Scheme } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -7,7 +7,9 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, FileText, ListOrdered, MessageSquareQuote, XCircle } from 'lucide-react';
+import { CheckCircle2, FileText, ListOrdered, MessageSquareQuote, XCircle, ArrowUpRight } from 'lucide-react';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 interface SchemeCardProps {
   scheme: Scheme;
@@ -20,33 +22,36 @@ const PriorityBadge = ({ priority }: { priority: 'High' | 'Medium' | 'Low' }) =>
     Low: 'outline',
   }[priority] as 'default' | 'secondary' | 'outline';
 
-  return <Badge variant={variant}>{priority} Priority</Badge>;
+  return <Badge variant={variant} className="border-primary/50">{priority} Priority</Badge>;
 };
 
 export default function SchemeCard({ scheme }: SchemeCardProps) {
   return (
-    <Card className="bg-card/80">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium">{scheme.schemeName}</CardTitle>
-        <div className="flex items-center gap-2">
-          {scheme.priority && <PriorityBadge priority={scheme.priority} />}
-          {scheme.eligible ? (
-            <span className="flex items-center gap-1 text-green-600">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="font-semibold">Eligible</span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-destructive">
-              <XCircle className="h-5 w-5" />
-              <span className="font-semibold">Not Eligible</span>
-            </span>
-          )}
+    <Card className="bg-card/80 transition-shadow hover:shadow-md">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+        <div className="space-y-1">
+            <CardTitle className="text-lg font-medium">{scheme.schemeName}</CardTitle>
+            <div className="flex items-center gap-2">
+                {scheme.priority && <PriorityBadge priority={scheme.priority} />}
+            </div>
         </div>
+        
+        {scheme.eligible ? (
+            <span className="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
+                <CheckCircle2 className="h-5 w-5" />
+                Eligible
+            </span>
+            ) : (
+            <span className="flex items-center gap-1.5 text-destructive font-semibold text-sm">
+                <XCircle className="h-5 w-5" />
+                Not Eligible
+            </span>
+        )}
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="explanation">
-            <AccordionTrigger className='font-semibold text-base'>
+            <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
               <MessageSquareQuote className='mr-2 h-5 w-5 text-primary'/> AI Explanation
             </AccordionTrigger>
             <AccordionContent className="prose prose-sm max-w-none text-muted-foreground pl-4 border-l-2 ml-2">
@@ -56,7 +61,7 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
 
           {scheme.documentsRequired && scheme.documentsRequired.length > 0 && (
             <AccordionItem value="documents">
-              <AccordionTrigger className='font-semibold text-base'>
+              <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
                 <FileText className='mr-2 h-5 w-5 text-primary'/> Documents Required
               </AccordionTrigger>
               <AccordionContent className="pl-4 border-l-2 ml-2">
@@ -71,7 +76,7 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
 
           {scheme.applicationSteps && scheme.applicationSteps.length > 0 && (
             <AccordionItem value="steps">
-              <AccordionTrigger className='font-semibold text-base'>
+              <AccordionTrigger className='font-semibold text-base no-underline hover:no-underline'>
                 <ListOrdered className='mr-2 h-5 w-5 text-primary'/> Application Steps
               </AccordionTrigger>
               <AccordionContent className="pl-4 border-l-2 ml-2">
@@ -85,6 +90,16 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
           )}
         </Accordion>
       </CardContent>
+      {scheme.applicationLink && (
+        <CardFooter className="bg-muted/50 py-3 px-6">
+            <Button asChild className='w-full' size="sm">
+                <Link href={scheme.applicationLink} target="_blank" rel="noopener noreferrer">
+                    Apply Now
+                    <ArrowUpRight className='ml-2 h-4 w-4' />
+                </Link>
+            </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }

@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import Chatbot from '@/components/app/chatbot';
 import type { EligibilityFormValues } from '@/lib/schema';
-import { FileText } from 'lucide-react';
 
 export default function Home() {
   const [result, setResult] = React.useState<EligibilityResponse | null>(null);
@@ -39,17 +38,17 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="grid gap-12 lg:grid-cols-5">
+      <div className="grid gap-12 lg:grid-cols-5 items-start">
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-2 text-center lg:text-left">
             <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline">
               GovScheme AI
             </h1>
             <p className="text-lg text-muted-foreground">
-              Your guide to government benefits, powered by AI.
+              Your personal guide to Indian government benefits, powered by AI.
             </p>
           </div>
-          <Card className="shadow-lg border-2 border-primary/20">
+          <Card className="shadow-lg border-2 border-primary/10">
             <CardContent className="p-6">
               <EligibilityForm
                 onSubmit={handleCheckEligibility}

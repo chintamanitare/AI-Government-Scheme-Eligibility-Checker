@@ -22,6 +22,7 @@ const SchemeSchema = z.object({
   rejectionReason: z.string().nullable().describe("If not eligible, a clear reason why, and what can be improved. This should be in the user's selected language."),
   documentsRequired: z.array(z.string()).describe("A checklist of documents required for application."),
   applicationSteps: z.array(z.string()).describe("A step-by-step guide on how to apply for the scheme."),
+  applicationLink: z.string().url().nullable().describe("The official URL to the scheme's application page or portal."),
 });
 
 const CheckEligibilityOutputSchema = z.object({
@@ -52,12 +53,13 @@ const eligibilityPrompt = ai.definePrompt({
     2.  **Identify Schemes:** Identify a list of 5-7 of the most relevant Central and State-specific government schemes. Include a mix of schemes for which they are eligible and some for which they are not, if relevant (e.g., they are very close to being eligible). Key schemes to consider include: Pradhan Mantri Awas Yojana (PMAY), Ayushman Bharat (PMJAY), Pradhan Mantri Kisan Samman Nidhi (PM-KISAN), Sukanya Samriddhi Yojana, National Pension Scheme (NPS), and state-specific schemes like Ladli Behna Yojana (MP) or Kalia Yojana (Odisha).
     3.  **Determine Eligibility:** For each scheme, accurately determine if the user is eligible based on their profile.
     4.  **Rank Schemes:** Assign a priority ("High", "Medium", "Low") based on the scheme's relevance and potential benefit to the user. High priority for schemes that are a perfect match and offer significant benefits.
-    5.  **Generate Explanations (in {{{language}}}):**
+    5.  **Find Application Link:** For each scheme, find the official government URL for the application portal. If a direct link exists, provide it. If not, provide a link to the main scheme page. If no official link can be found, set the value to null.
+    6.  **Generate Explanations (in {{{language}}}):**
         - If **eligible**: Write a simple, clear explanation of the scheme's benefits and why the user is eligible.
         - If **not eligible**: Clearly explain why. For example, "Your income of ₹{{{income}}} is above the ₹2,50,000 limit for this scheme." Also, suggest what they could do to become eligible if possible (e.g., "This scheme is for individuals over 60 years of age.").
-    6.  **Generate Document Checklist:** For each scheme, list the necessary documents for the application (e.g., "Aadhar Card", "PAN Card", "Income Certificate").
-    7.  **Generate Application Guide:** For each scheme, provide a simple, step-by-step application process.
-    8.  **Provide Final Advice (in {{{language}}}):** Write a short, encouraging summary. For example, "You are eligible for several key schemes! I recommend starting with the Pradhan Mantri Awas Yojana application first as it has high priority. Make sure you have all your documents ready."
+    7.  **Generate Document Checklist:** For each scheme, list the necessary documents for the application (e.g., "Aadhar Card", "PAN Card", "Income Certificate").
+    8.  **Generate Application Guide:** For each scheme, provide a simple, step-by-step application process.
+    9.  **Provide Final Advice (in {{{language}}}):** Write a short, encouraging summary. For example, "You are eligible for several key schemes! I recommend starting with the Pradhan Mantri Awas Yojana application first as it has high priority. Make sure you have all your documents ready."
 
     **Crucial Instructions:**
     - **Language:** All text-based output (explanation, rejectionReason, finalAdvice, schemeName, etc.) MUST be in **{{{language}}}**.
