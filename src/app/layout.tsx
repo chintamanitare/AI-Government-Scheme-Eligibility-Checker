@@ -4,9 +4,10 @@ import { Toaster } from '@/components/ui/toaster';
 import AppHeader from '@/components/app/header';
 import AppFooter from '@/components/app/footer';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import Chatbot from '@/components/app/chatbot';
 
 export const metadata: Metadata = {
-  title: 'Aadhar Assist AI',
+  title: 'Government Scheme & Scholarship Checker',
   description: 'Check your eligibility for government schemes and scholarships in seconds.',
 };
 
@@ -25,6 +26,7 @@ export default function RootLayout({
               <AppFooter />
             </div>
             <Toaster />
+            <Chatbot />
           </FirebaseClientProvider>
       </body>
     </html>
