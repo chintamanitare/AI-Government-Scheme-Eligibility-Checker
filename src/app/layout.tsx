@@ -5,6 +5,7 @@ import AppHeader from '@/components/app/header';
 import AppFooter from '@/components/app/footer';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Chatbot from '@/components/app/chatbot';
+import ClientOnly from '@/components/client-only';
 
 export const metadata: Metadata = {
   title: 'Government Scheme & Scholarship Checker',
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <ClientOnly>
           <FirebaseClientProvider>
             <div className="relative flex min-h-dvh flex-col">
               <AppHeader />
@@ -28,6 +30,7 @@ export default function RootLayout({
             <Toaster />
             <Chatbot />
           </FirebaseClientProvider>
+        </ClientOnly>
       </body>
     </html>
   );
