@@ -9,22 +9,22 @@ import { Loader2, RefreshCw } from 'lucide-react';
 import ResultsDisplay from '@/components/app/results-display';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
+  const { toast } = useToast();
   const [checks, setChecks] = React.useState<EligibilityCheckRecord[]>([]);
   const [selectedCheck, setSelectedCheck] = React.useState<EligibilityCheckRecord | null>(null);
   const [selectedCheckResponse, setSelectedCheckResponse] = React.useState<EligibilityResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchChecks = React.useCallback(async () => {
-    if (!user) return; 
-
+  const fetchChecks = React.useCallback(async (userId: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await getSavedChecks();
+      const result = await getSavedChecks(userId);
       if (result.error) {
         setError(result.error);
         toast({
@@ -51,19 +51,25 @@ export default function DashboardPage() {
     } finally {
         setIsLoading(false);
     }
-  }, [user]);
+  }, [toast]);
 
   React.useEffect(() => {
-    if (!isUserLoading) {
-      if (user) {
-        fetchChecks();
-      } else {
-        setIsLoading(false);
-        setError("Please sign in to view your dashboard.");
-        setChecks([]);
-        setSelectedCheck(null);
-        setSelectedCheckResponse(null);
-      }
+    // Wait until the user loading state is resolved.
+    if (isUserLoading) {
+      setIsLoading(true);
+      return;
+    }
+    
+    // Once loading is done, check if we have a user.
+    if (user) {
+      fetchChecks(user.uid);
+    } else {
+      // If no user, stop loading and show appropriate message.
+      setIsLoading(false);
+      setError("Please sign in to view your dashboard.");
+      setChecks([]);
+      setSelectedCheck(null);
+      setSelectedCheckResponse(null);
     }
   }, [user, isUserLoading, fetchChecks]);
 
@@ -78,6 +84,12 @@ export default function DashboardPage() {
     }
   };
   
+  const handleRefresh = () => {
+    if (user) {
+        fetchChecks(user.uid);
+    }
+  };
+
   const renderTimestamp = (check: EligibilityCheckRecord) => {
     if (check.createdAt?.seconds) {
       return format(new Date(check.createdAt.seconds * 1000), 'PPP p');
@@ -126,7 +138,7 @@ export default function DashboardPage() {
             View your previously saved eligibility checks.
             </p>
         </div>
-        <Button variant="outline" onClick={fetchChecks} disabled={isLoading}>
+        <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}/>
             <span className='ml-2'>Refresh</span>
         </Button>

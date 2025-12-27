@@ -2,10 +2,9 @@
 
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
-import { auth, db } from "@/firebase";
+import { db } from "@/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { headers } from 'next/headers';
-import { Auth, getAuth, User } from "firebase/auth";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -20,21 +19,9 @@ export type EligibilityCheckRecord = CheckEligibilityInput & {
     };
 };
 
-// This is a temporary helper function to get the current user on the server.
-// In a production app, this would be handled by a more robust authentication solution.
-async function getCurrentUser(): Promise<User | null> {
-    // This is not a reliable way to get the user on the server.
-    // It's a workaround for the hackathon context.
-    // A proper implementation would use session management or server-side Firebase Auth.
-    return auth.currentUser;
-}
-
-
 export async function getEligibility(input: CheckEligibilityInput): Promise<EligibilityResponse> {
   try {
-    console.log("Checking eligibility for:", input);
     const result = await checkEligibility(input);
-    console.log("AI response received:", result);
     return result;
   } catch (e: any) {
     console.error("Error in getEligibility action:", e);
@@ -43,25 +30,25 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
   }
 }
 
-export async function saveCheck(input: CheckEligibilityInput, aiResponse: CheckEligibilityOutput): Promise<{success?: boolean, error?: string}> {
+export async function saveCheck(userId: string, input: CheckEligibilityInput, aiResponse: CheckEligibilityOutput): Promise<{success?: boolean, error?: string}> {
+    if (!userId) {
+        return { error: "You must be logged in to save a check." };
+    }
     try {
-        const user = await getCurrentUser();
-
-        if (!user) {
-            return { error: "You must be logged in to save a check." };
-        }
-
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, "users", userId);
         const userChecksCollection = collection(userDocRef, "eligibility_checks");
         
         const docData = {
             ...input,
-            userId: user.uid,
+            userId: userId,
             aiResponse: JSON.stringify(aiResponse),
             createdAt: serverTimestamp(),
         };
-        await addDoc(userChecksCollection, docData);
-        console.log("Saved eligibility check for user:", user.uid);
+
+        // Use non-blocking write
+        addDocumentNonBlocking(userChecksCollection, docData);
+
+        console.log("Queued eligibility check save for user:", userId);
         return { success: true };
 
     } catch(e: any) {
@@ -71,17 +58,13 @@ export async function saveCheck(input: CheckEligibilityInput, aiResponse: CheckE
 }
 
 
-export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
+export async function getSavedChecks(userId: string): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
+    if (!userId) {
+         console.warn("Could not get saved checks. User is not authenticated.");
+         return { checks: [] };
+    }
     try {
-        const user = await getCurrentUser();
-
-        if (!user) {
-             console.warn("Could not get saved checks. User is not authenticated.");
-             // Return empty array instead of error to not break the UI for anonymous users.
-            return { checks: [] };
-        }
-
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, "users", userId);
         const userChecksCollection = collection(userDocRef, "eligibility_checks");
         const q = query(userChecksCollection, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);

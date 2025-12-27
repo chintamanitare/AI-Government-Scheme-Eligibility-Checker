@@ -47,10 +47,10 @@ export default function Home() {
   };
 
   const handleSaveCheck = async () => {
-    if (!formData || !result || 'error' in result) return;
+    if (!formData || !result || 'error' in result || !user) return;
 
     setIsSaving(true);
-    const response = await saveCheck(formData, result as CheckEligibilityOutput);
+    const response = await saveCheck(user.uid, formData, result as CheckEligibilityOutput);
     setIsSaving(false);
 
     if (response.error) {
