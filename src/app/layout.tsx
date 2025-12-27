@@ -14,8 +14,8 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'GovScheme AI - Eligibility Checker',
-  description: 'Know your government benefits in seconds.',
+  title: 'Aadhar Assist AI - Your Guide to Government Schemes',
+  description: 'Check your eligibility for government schemes and scholarships in seconds.',
 };
 
 export default function RootLayout({
@@ -25,8 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={ptSans.variable}>
-        <div className="min-h-screen bg-background font-body antialiased">
+      <body>
+        <div className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
           <FirebaseClientProvider>
             <div className="relative flex min-h-dvh flex-col">
               <AppHeader />
