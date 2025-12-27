@@ -38,8 +38,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-24">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-6xl font-headline">
-          Aadhar Assist AI
+        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline">
+          Government Scheme & Scholarship Checker
         </h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           Your personal guide to Indian government benefits and student scholarships. Choose a path below to begin.

@@ -46,8 +46,8 @@ export default function AppHeader() {
         <Link href="/" className="flex items-center gap-2 text-primary">
           <AshokaChakraIcon className="h-8 w-8" />
           <div className="flex flex-col">
-            <span className="text-xl font-bold font-headline">Aadhar Assist AI</span>
-            <span className="text-xs text-muted-foreground">Schemes & Scholarships Guide</span>
+            <span className="text-lg font-bold font-headline leading-tight">Govt. Scheme & Scholarship</span>
+            <span className="text-sm font-bold font-headline leading-tight">Checker</span>
           </div>
         </Link>
         

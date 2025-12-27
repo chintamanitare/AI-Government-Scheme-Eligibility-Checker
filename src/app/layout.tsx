@@ -7,7 +7,7 @@ import AppFooter from '@/components/app/footer';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'Aadhar Assist AI - Your Guide to Government Schemes & Scholarships',
+  title: 'Government Scheme & Scholarship Checker',
   description: 'Check your eligibility for government schemes and scholarships in seconds.',
 };
 
