@@ -36,7 +36,7 @@ export default function EligibilityForm({ onSubmit, isLoading }: EligibilityForm
   const form = useForm<EligibilityFormValues>({
     resolver: zodResolver(eligibilitySchema),
     defaultValues: {
-      age: '' as any,
+      age: '',
       income: '',
       state: '',
       category: '',
