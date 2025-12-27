@@ -1,15 +1,16 @@
 'use server';
 
-import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
+import { checkEligibility, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
 import { initializeServerFirebase } from "@/firebase/server-init";
+import type { EligibilityFormValues } from "@/lib/schema";
 
 initializeServerFirebase();
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
 
-export type EligibilityCheckRecord = CheckEligibilityInput & {
+export type EligibilityCheckRecord = EligibilityFormValues & {
     id: string;
     userId: string;
     aiResponse: string;
@@ -19,7 +20,7 @@ export type EligibilityCheckRecord = CheckEligibilityInput & {
     };
 };
 
-export async function getEligibility(input: CheckEligibilityInput): Promise<EligibilityResponse> {
+export async function getEligibility(input: EligibilityFormValues): Promise<EligibilityResponse> {
   try {
     const result = await checkEligibility(input);
     return result;

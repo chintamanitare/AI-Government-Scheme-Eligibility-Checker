@@ -11,8 +11,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { checkEligibilityTool, CheckEligibilityOutputSchema } from './check-eligibility';
 import { findScholarships } from './find-scholarships';
+import { checkEligibility } from './check-eligibility';
 
 const FindScholarshipsInputSchema = z.object({
   age: z.number().describe('The age of the applicant.'),
@@ -37,7 +37,6 @@ const FindScholarshipsOutputSchema = z.object({
   finalAdvice: z.string().describe("A concluding piece of advice for the student in a friendly, encouraging tone. This should be in the user's selected language."),
 });
 
-
 const findScholarshipsTool = ai.defineTool(
   {
     name: 'findScholarships',
@@ -56,6 +55,52 @@ const findScholarshipsTool = ai.defineTool(
     return output;
   }
 );
+
+
+const CheckEligibilityInputSchema = z.object({
+  age: z.number().describe('The age of the applicant.'),
+  income: z.string().describe('The annual income of the applicant in Indian Rupees (₹).'),
+  state: z.string().describe('The state of the applicant.'),
+  category: z.string().describe('The category of the applicant (General, SC, ST, OBC, EWS).'),
+  occupation: z.string().describe('The occupation of the applicant.'),
+  language: z.string().describe('The preferred language for the response (e.g., English, Hindi, Marathi).'),
+});
+
+const SchemeSchema = z.object({
+  schemeName: z.string().describe("The name of the government scheme."),
+  eligible: z.boolean().describe("Whether the user is eligible for the scheme."),
+  priority: z.enum(["High", "Medium", "Low"]).describe("The relevance and benefit ranking for the user."),
+  explanation: z.string().describe("An explanation of the scheme and why the user is eligible. This should be in the user's selected language."),
+  rejectionReason: z.string().nullable().describe("If not eligible, a clear reason why, and what can be improved. This should be in the user's selected language."),
+  documentsRequired: z.array(z.string()).describe("A checklist of documents required for application."),
+  applicationSteps: z.array(z.string()).describe("A step-by-step guide on how to apply for the scheme."),
+  applicationLink: z.string().url().nullable().describe("The official URL to the scheme's application page or portal."),
+});
+
+const CheckEligibilityOutputSchema = z.object({
+  schemes: z.array(SchemeSchema).describe("A list of relevant government schemes for the user."),
+  finalAdvice: z.string().describe("A concluding piece of advice for the user in a friendly, encouraging tone. This should be in the user's selected language."),
+});
+
+
+const checkEligibilityTool = ai.defineTool(
+    {
+      name: 'checkEligibility',
+      description: 'Checks a user\'s eligibility for government schemes. Use this when the user asks for schemes and has provided all the necessary details.',
+      inputSchema: CheckEligibilityInputSchema,
+      outputSchema: CheckEligibilityOutputSchema,
+    },
+    async (input) => {
+        console.log('checkEligibilityTool input', input);
+      const output = await checkEligibility(input);
+      console.log('checkEligibilityTool output', output);
+      if (!output) {
+        throw new Error('Failed to check eligibility');
+      }
+      return output;
+    }
+);
+
 
 const AskChatbotInputSchema = z.object({
   query: z.string().describe("The user's question."),
@@ -109,27 +154,27 @@ const askChatbotFlow = ai.defineFlow(
         - Keep your answers short and to the point.
         - If you don't know the answer, say "I'm sorry, I don't have information on that topic. My expertise is limited to Indian government schemes and scholarships." Do not invent information.
         - If the user provides all the information needed to use a tool, use the tool. Do not ask for the information again.
-        - When you use a tool, do not repeat the information back to the user. Instead, tell the user that you are processing their request. For example, "Thank you for providing the details! I am now looking for suitable scholarships for you."
+        - When you use a tool, do not repeat the information back to the user. Instead, tell the user that you are processing their request. For example: "Thank you for providing the details! I am now looking for suitable scholarships for you."
         - Default to the language 'English' if the user has not specified a language.
 
         **Advanced Interaction Rules:**
-        - **Clarify Ambiguity:** If a user's query is vague or incomplete (e.g., "what schemes can I get?"), you MUST ask clarifying questions in a friendly, conversational way.
+        - **Clarify Ambiguity:** If a user's query is vague or incomplete (e.g., "what schemes can I get?"), you MUST ask clarifying questions.
         
-        - **For Government Schemes:** If the user asks about schemes without providing details, respond with:
-        "To check for government schemes, please tell me:
+        - **For Government Schemes:** If the user asks about schemes without providing details, respond with a simple numbered list:
+        "To check for schemes, I need a few details:
         1. Your Age
-        2. Your annual household income
+        2. Your annual income
         3. Your State
-        4. Your social category (General, SC, ST, OBC)
+        4. Your category (General, SC, ST, OBC, etc.)
         5. Your occupation"
 
-        - **For Scholarships:** If the user asks about scholarships without providing details, respond with:
-        "To find scholarships, please provide:
+        - **For Scholarships:** If the user asks about scholarships without providing details, respond with a simple numbered list:
+        "To find scholarships, I need a few details:
         1. Your Age
-        2. Your course of study (e.g., 12th Class, B.Tech)
+        2. Your course/degree
         3. Your annual family income
-        4. Your state of residence
-        5. Your social category (General, SC, ST, OBC)"
+        4. Your state
+        5. Your category (General, SC, ST, OBC, etc.)"
         `,
       });
 

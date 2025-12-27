@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const CheckEligibilityInputSchema = z.object({
+const CheckEligibilityInputSchema = z.object({
   age: z.number().describe('The age of the applicant.'),
   income: z.string().describe('The annual income of the applicant in Indian Rupees (₹).'),
   state: z.string().describe('The state of the applicant.'),
@@ -12,9 +12,9 @@ export const CheckEligibilityInputSchema = z.object({
   language: z.string().describe('The preferred language for the response (e.g., English, Hindi, Marathi).'),
 });
 
-export type CheckEligibilityInput = z.infer<typeof CheckEligibilityInputSchema>;
+type CheckEligibilityInput = z.infer<typeof CheckEligibilityInputSchema>;
 
-export const SchemeSchema = z.object({
+const SchemeSchema = z.object({
   schemeName: z.string().describe("The name of the government scheme."),
   eligible: z.boolean().describe("Whether the user is eligible for the scheme."),
   priority: z.enum(["High", "Medium", "Low"]).describe("The relevance and benefit ranking for the user."),
@@ -25,7 +25,7 @@ export const SchemeSchema = z.object({
   applicationLink: z.string().url().nullable().describe("The official URL to the scheme's application page or portal."),
 });
 
-export const CheckEligibilityOutputSchema = z.object({
+const CheckEligibilityOutputSchema = z.object({
   schemes: z.array(SchemeSchema).describe("A list of relevant government schemes for the user."),
   finalAdvice: z.string().describe("A concluding piece of advice for the user in a friendly, encouraging tone. This should be in the user's selected language."),
 });
@@ -68,32 +68,21 @@ const eligibilityPrompt = ai.definePrompt({
   `,
 });
 
-export const checkEligibilityTool = ai.defineTool(
-    {
-      name: 'checkEligibility',
-      description: 'Checks a user\'s eligibility for government schemes. Use this when the user asks for schemes and has provided all the necessary details.',
-      inputSchema: CheckEligibilityInputSchema,
-      outputSchema: CheckEligibilityOutputSchema,
-    },
-    async (input) => {
-        console.log('checkEligibilityTool input', input);
-      const { output } = await eligibilityPrompt(input);
-      console.log('checkEligibilityTool output', output);
-      if (!output) {
-        throw new Error('Failed to check eligibility');
-      }
-      return output;
-    }
-);
-
-
-export const checkEligibility = ai.defineFlow(
+const checkEligibilityFlow = ai.defineFlow(
   {
     name: 'checkEligibilityFlow',
     inputSchema: CheckEligibilityInputSchema,
     outputSchema: CheckEligibilityOutputSchema,
   },
   async (input) => {
-    return checkEligibilityTool(input);
+    const { output } = await eligibilityPrompt(input);
+    if (!output) {
+      throw new Error('Failed to check eligibility');
+    }
+    return output;
   }
 );
+
+export async function checkEligibility(input: CheckEligibilityInput): Promise<CheckEligibilityOutput> {
+    return checkEligibilityFlow(input);
+}
