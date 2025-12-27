@@ -4,7 +4,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const FindScholarshipsInputSchema = z.object({
+const FindScholarshipsInputSchema = z.object({
   age: z.number().describe('The age of the applicant.'),
   income: z.string().describe('The annual family income of the applicant in Indian Rupees (₹).'),
   state: z.string().describe('The state of domicile for the applicant.'),
@@ -13,9 +13,9 @@ export const FindScholarshipsInputSchema = z.object({
   language: z.string().describe('The preferred language for the response (e.g., English, Hindi, Marathi).'),
 });
 
-export type FindScholarshipsInput = z.infer<typeof FindScholarshipsInputSchema>;
+type FindScholarshipsInput = z.infer<typeof FindScholarshipsInputSchema>;
 
-export const ScholarshipSchema = z.object({
+const ScholarshipSchema = z.object({
   scholarshipName: z.string().describe("The name of the scholarship."),
   provider: z.string().describe("The organization or platform providing the scholarship (e.g., Buddy4Study, MahaDBT, National Scholarship Portal)."),
   eligible: z.boolean().describe("Whether the user is likely eligible based on the provided details."),
@@ -24,7 +24,7 @@ export const ScholarshipSchema = z.object({
   applicationLink: z.string().url().nullable().describe("The direct official URL to the scholarship's application page or portal."),
 });
 
-export const FindScholarshipsOutputSchema = z.object({
+const FindScholarshipsOutputSchema = z.object({
   scholarships: z.array(ScholarshipSchema).describe("A list of 3-5 relevant scholarships for the student."),
   finalAdvice: z.string().describe("A concluding piece of advice for the student in a friendly, encouraging tone. This should be in the user's selected language."),
 });

@@ -11,8 +11,32 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { FindScholarshipsInputSchema, FindScholarshipsOutputSchema } from './find-scholarships';
 import { checkEligibilityTool, CheckEligibilityOutputSchema } from './check-eligibility';
+import { findScholarships } from './find-scholarships';
+
+const FindScholarshipsInputSchema = z.object({
+  age: z.number().describe('The age of the applicant.'),
+  income: z.string().describe('The annual family income of the applicant in Indian Rupees (₹).'),
+  state: z.string().describe('The state of domicile for the applicant.'),
+  category: z.string().describe('The caste/community category of the applicant (General, SC, ST, OBC, EWS, Minority).'),
+  degree: z.string().describe('The current degree or course the student is enrolled in (e.g., 12th Pass, Undergraduate B.Tech, Postgraduate M.A.).'),
+  language: z.string().describe('The preferred language for the response (e.g., English, Hindi, Marathi).'),
+});
+
+const ScholarshipSchema = z.object({
+  scholarshipName: z.string().describe("The name of the scholarship."),
+  provider: z.string().describe("The organization or platform providing the scholarship (e.g., Buddy4Study, MahaDBT, National Scholarship Portal)."),
+  eligible: z.boolean().describe("Whether the user is likely eligible based on the provided details."),
+  description: z.string().describe("A brief, clear description of the scholarship. This should be in the user's selected language."),
+  benefits: z.array(z.string()).describe("A list of key benefits, like 'Up to ₹50,000', 'Tuition Fee Waiver', etc."),
+  applicationLink: z.string().url().nullable().describe("The direct official URL to the scholarship's application page or portal."),
+});
+
+const FindScholarshipsOutputSchema = z.object({
+  scholarships: z.array(ScholarshipSchema).describe("A list of 3-5 relevant scholarships for the student."),
+  finalAdvice: z.string().describe("A concluding piece of advice for the student in a friendly, encouraging tone. This should be in the user's selected language."),
+});
+
 
 const findScholarshipsTool = ai.defineTool(
   {
@@ -24,7 +48,6 @@ const findScholarshipsTool = ai.defineTool(
   async (input) => {
     console.log('findScholarshipsTool input', input);
     // Directly call the underlying prompt/flow logic for scholarships
-    const { findScholarships } = await import('./find-scholarships');
     const output = await findScholarships(input);
     console.log('findScholarshipsTool output', output);
     if (!output) {
