@@ -3,7 +3,7 @@
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
 import { initializeServerFirebase } from "@/firebase/server-init";
-import { collection, serverTimestamp, getDocs, query, orderBy, addDoc } from "firebase/firestore";
+import { collection, serverTimestamp, getDocs, query, orderBy, addDoc, FieldValue } from "firebase/firestore";
 
 const { db } = initializeServerFirebase();
 
@@ -38,11 +38,12 @@ export async function saveCheck(userId: string, input: CheckEligibilityInput, ai
     try {
         const userChecksCollection = collection(db, "users", userId, "eligibility_checks");
         
+        // Create the data object without the server timestamp first
         const docData = {
             ...input,
             userId: userId,
             aiResponse: JSON.stringify(aiResponse),
-            createdAt: serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(), // Use Admin SDK's serverTimestamp
         };
         
         await addDoc(userChecksCollection, docData);
