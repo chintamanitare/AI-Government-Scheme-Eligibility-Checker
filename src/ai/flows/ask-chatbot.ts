@@ -12,7 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const AskChatbotInputSchema = z.object({
-  query: z.string().describe('The user\'s question.'),
+  query: z.string().describe("The user's question."),
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
@@ -21,7 +21,7 @@ const AskChatbotInputSchema = z.object({
 export type AskChatbotInput = z.infer<typeof AskChatbotInputSchema>;
 
 const AskChatbotOutputSchema = z.object({
-  response: z.string().describe('The AI\'s response to the user\'s query.'),
+  response: z.string().describe("The AI's response to the user's query."),
   error: z.string().optional().describe('An error message if the query failed.'),
 });
 export type AskChatbotOutput = z.infer<typeof AskChatbotOutputSchema>;
@@ -33,14 +33,13 @@ export async function askChatbot(input: AskChatbotInput): Promise<AskChatbotOutp
 const chatbotPrompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: AskChatbotInputSchema },
-  output: { schema: z.string() },
-  prompt: `You are a helpful and friendly AI assistant for "GovScheme AI", a platform that helps Indian citizens understand and apply for government welfare schemes. Your goal is to answer user questions accurately and concisely.
+  output: { schema: AskChatbotOutputSchema },
+  prompt: `You are a helpful and friendly AI assistant for "GovScheme AI", a platform that helps Indian citizens understand and apply for government welfare schemes. Your goal is to answer user questions accurately and concisely based on the provided conversation history.
 
   **Instructions:**
   - Your persona is that of a knowledgeable and patient government helpdesk officer.
   - Keep your answers short and to the point.
   - If you don't know the answer, say "I'm sorry, I don't have information on that topic. My expertise is limited to Indian government schemes."
-  - Base your answers on the provided conversation history.
   - Do not invent information.
 
   **Conversation History:**
@@ -55,8 +54,6 @@ const chatbotPrompt = ai.definePrompt({
   
   **New User Question:**
   {{{query}}}
-
-  **Your Answer:**
   `,
 });
 
@@ -69,10 +66,10 @@ const askChatbotFlow = ai.defineFlow(
   async (input) => {
     try {
       const { output } = await chatbotPrompt(input);
-      if (!output) {
+      if (!output?.response) {
         return { response: "I'm sorry, I wasn't able to generate a response. Please try again." };
       }
-      return { response: output };
+      return output;
     } catch (e: any) {
       console.error("Error in askChatbotFlow:", e);
       return { response: "", error: "An error occurred while processing your request." };
