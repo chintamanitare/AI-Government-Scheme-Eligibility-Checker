@@ -43,7 +43,7 @@ export default function Home() {
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-2 text-center lg:text-left">
             <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline">
-              Aadhar Assist AI
+              GovScheme AI
             </h1>
             <p className="text-lg text-muted-foreground">
               Your guide to government benefits, powered by AI.
