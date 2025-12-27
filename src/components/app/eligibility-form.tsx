@@ -24,7 +24,7 @@ import { indianStates } from '@/lib/states';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 const categories = ['General', 'SC', 'ST', 'OBC', 'EWS'];
-const languages = ['English', 'Hindi'];
+const languages = ['English', 'Hindi', 'Marathi', 'Tamil'];
 const occupations = ['Student', 'Farmer', 'Worker', 'Business', 'Other'];
 
 interface EligibilityFormProps {
