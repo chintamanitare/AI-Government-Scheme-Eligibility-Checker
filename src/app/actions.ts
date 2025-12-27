@@ -1,6 +1,7 @@
 'use server';
 
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
+import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
 import { auth, db } from "@/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDoc, query, orderBy, getDocs } from "firebase/firestore";
 import { headers } from 'next/headers';
@@ -45,7 +46,6 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
         const user = await getAuthenticatedUserOnServer();
 
         if (user) {
-            // Save to user's subcollection if logged in
             const userDocRef = doc(db, "users", user.uid);
             const userChecksCollection = collection(userDocRef, "eligibility_checks");
             
@@ -60,7 +60,6 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
         }
     } catch(authError) {
         console.warn("Could not save eligibility check for unauthenticated user.");
-        // We can choose to not fail the whole operation if saving fails
     }
 
     console.log("AI response received:", result);
@@ -95,4 +94,16 @@ export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord
         console.error("Error fetching saved checks:", e);
         return { error: e.message || "An unknown error occurred." };
     }
+}
+
+
+export async function getChatbotResponse(input: AskChatbotInput): Promise<AskChatbotOutput> {
+  try {
+    const result = await askChatbot(input);
+    return result;
+  } catch (e: any) {
+    console.error("Error in getChatbotResponse action:", e);
+    const errorMessage = e.message || "An unknown error occurred while getting chatbot response.";
+    return { error: errorMessage };
+  }
 }

@@ -6,6 +6,7 @@ import EligibilityForm from '@/components/app/eligibility-form';
 import ResultsDisplay from '@/components/app/results-display';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
+import Chatbot from '@/components/app/chatbot';
 
 export default function Home() {
   const [result, setResult] = React.useState<EligibilityResponse | null>(null);
@@ -62,6 +63,7 @@ export default function Home() {
           />
         </div>
       </div>
+      <Chatbot />
     </div>
   );
 }
