@@ -16,6 +16,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { AnimatePresence, motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 type Message = {
   role: 'user' | 'model';
@@ -130,7 +131,9 @@ export default function Chatbot() {
                               : 'bg-muted'
                           )}
                         >
-                          <p>{message.content}</p>
+                          <div className="prose prose-sm max-w-none">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
                         </div>
                          {message.role === 'user' && (
                           <Avatar className="h-8 w-8">
