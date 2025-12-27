@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -44,11 +45,11 @@ export default function AppHeader() {
     <header className="py-4 md:px-8 border-b">
       <div className="container flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-primary">
-          <AshokaChakraIcon className="h-8 w-8" />
-          <div className="flex flex-col">
-            <span className="text-lg font-bold font-headline leading-tight">Govt. Scheme & Scholarship</span>
-            <span className="text-sm font-bold font-headline leading-tight">Checker</span>
-          </div>
+          <AshokaChakraIcon className="h-8 w-8 flex-shrink-0" />
+            <span className="text-base font-bold font-headline leading-tight">
+              Government Scheme &<br />
+              Scholarship Checker
+            </span>
         </Link>
         
         <div className="flex items-center gap-2">
