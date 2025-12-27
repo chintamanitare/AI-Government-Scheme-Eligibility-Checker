@@ -68,11 +68,11 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-2">
-                <ul className="list-disc space-y-2 pl-12 text-muted-foreground text-sm">
+                <ol className="list-decimal space-y-2 pl-12 text-muted-foreground text-sm">
                   {scheme.documentsRequired.map((doc, i) => (
                     <li key={i}>{doc}</li>
                   ))}
-                </ul>
+                </ol>
               </AccordionContent>
             </AccordionItem>
           )}
