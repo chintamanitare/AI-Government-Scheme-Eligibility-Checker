@@ -34,44 +34,25 @@ export async function askChatbot(input: AskChatbotInput): Promise<AskChatbotOutp
   return askChatbotFlow(input);
 }
 
-const chatbotPrompt = ai.definePrompt({
-  name: 'chatbotPrompt',
-  input: { schema: AskChatbotInputSchema },
-  // The output is now a simple string, which is easier for the model to generate.
-  output: { format: 'text' },
-  prompt: `You are a helpful and friendly AI assistant for "GovScheme AI", a platform that helps Indian citizens understand and apply for government welfare schemes. Your goal is to answer user questions accurately and concisely based on the provided conversation history.
-
-  **Instructions:**
-  - Your persona is that of a knowledgeable and patient government helpdesk officer.
-  - Keep your answers short and to the point.
-  - If you don't know the answer, say "I'm sorry, I don't have information on that topic. My expertise is limited to Indian government schemes."
-  - Do not invent information.
-
-  **Conversation History:**
-  {{#each history}}
-  {{#if (eq role 'user')}}
-  User: {{{content}}}
-  {{/if}}
-  {{#if (eq role 'model')}}
-  AI: {{{content}}}
-  {{/if}}
-  {{/each}}
-  
-  **New User Question:**
-  {{{query}}}
-  `,
-});
-
 const askChatbotFlow = ai.defineFlow(
   {
     name: 'askChatbotFlow',
     inputSchema: AskChatbotInputSchema,
     outputSchema: AskChatbotOutputSchema,
   },
-  async (input) => {
+  async ({ query, history }) => {
     try {
-      // The prompt now returns a simple string in `response.text`.
-      const response = await chatbotPrompt(input);
+      const response = await ai.generate({
+        prompt: query,
+        history: history,
+        system: `You are a helpful and friendly AI assistant for "GovScheme AI", a platform that helps Indian citizens understand and apply for government welfare schemes. Your goal is to answer user questions accurately and concisely.
+
+        **Instructions:**
+        - Your persona is that of a knowledgeable and patient government helpdesk officer.
+        - Keep your answers short and to the point.
+        - If you don't know the answer, say "I'm sorry, I don't have information on that topic. My expertise is limited to Indian government schemes."
+        - Do not invent information.`,
+      });
       const textResponse = response.text;
 
       if (!textResponse) {
@@ -79,7 +60,6 @@ const askChatbotFlow = ai.defineFlow(
           response: "I'm sorry, I wasn't able to generate a response. Please try again.",
         };
       }
-      // We wrap the string response in the object format the client expects.
       return { response: textResponse };
     } catch (e: any) {
       console.error('Error in askChatbotFlow:', e);
