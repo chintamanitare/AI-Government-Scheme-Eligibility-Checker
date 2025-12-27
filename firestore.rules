@@ -1,0 +1,129 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model. All user-generated data,
+ * including profiles and eligibility checks, is private and can only be accessed by the user who
+ * created it. The default security posture is to deny all access unless explicitly granted.
+ *
+ * Data Structure: Data is organized hierarchically to reflect ownership. A top-level 'users'
+ * collection holds user profiles. Each user document then contains a private 'eligibility_checks'
+ * subcollection for their personal data. This structure ensures that security rules are simple,
+ * performant, and can be applied to entire data trees without complex lookups.
+ *
+ * Key Security Decisions:
+ * - User Isolation: Users are strictly confined to their own data tree (`/users/{userId}`). They cannot
+ *   read, write, or even know about the existence of other users' data.
+ * - No User Listing: Listing all documents in the top-level `/users` collection is explicitly forbidden
+ *   to protect user privacy and prevent data enumeration attacks.
+ * - Self-Creation: A user can only create their own profile document (`/users/{auth.uid}`), establishing
+ *   a secure root for all their subsequent data.
+ *
+ * Denormalization for Authorization: The data model naturally supports this principle. By nesting
+ * `eligibility_checks` under a specific user, we use the document path itself as the primary
+ * authorization mechanism. We also enforce that documents contain a `userId` field that matches
+ * the path, ensuring data integrity and preventing documents from being moved or associated with
+ * the wrong owner. This avoids slow and costly `get()` calls in rules.
+ *
+ * Structural Segregation: The use of a dedicated `eligibility_checks` subcollection for private
+ * user data is a prime example of structural segregation. It cleanly separates one user's private
+ * data from another's, making it impossible for queries or rules to leak information across user
+ * boundaries.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId from the path.
+     * This is the primary function for enforcing data ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * For update/delete operations, checks ownership AND ensures the document already exists.
+     * This prevents unauthorized modifications on non-existent paths.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * On create, validates that the new User document's internal 'id' field
+     * matches the user's auth UID, establishing a permanent ownership link.
+     */
+    function isUserDataValidOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * On update, ensures the User document's internal 'id' field is immutable.
+     * This prevents re-assigning the document to a different user.
+     */
+    function isUserDataValidOnUpdate() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * On create, validates that a new EligibilityCheck document is correctly linked
+     * to its parent user via the internal 'userId' field.
+     */
+    function isEligibilityCheckDataValidOnCreate(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    /**
+     * On update, ensures the EligibilityCheck's 'userId' field is immutable,
+     * preventing it from being moved to a different user's data tree.
+     */
+    function isEligibilityCheckDataValidOnUpdate() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Controls access to a user's profile document.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user creating their own profile document at `/users/user_abc` where `auth.uid` is `user_abc`.
+     * @deny (get) A user `user_abc` trying to read `/users/user_xyz`.
+     * @deny (list) Any user trying to list all documents in the `/users` collection.
+     * @principle Restricts access to a user's own data tree and prevents enumeration of all application users.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && isUserDataValidOnCreate(userId);
+      allow update: if isExistingOwner(userId) && isUserDataValidOnUpdate();
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Controls access to a user's private eligibility check records.
+       * @path /users/{userId}/eligibility_checks/{eligibilityCheckId}
+       * @allow (list) An authenticated user `user_abc` listing their own checks at `/users/user_abc/eligibility_checks`.
+       * @allow (create) An authenticated user `user_abc` creating a new document at `/users/user_abc/eligibility_checks/check_123`.
+       * @deny (get) A user `user_abc` trying to read a document at `/users/user_xyz/eligibility_checks/check_456`.
+       * @principle Enforces document ownership for all operations within a user-specific subcollection.
+       */
+      match /eligibility_checks/{eligibilityCheckId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isEligibilityCheckDataValidOnCreate(userId);
+        allow update: if isExistingOwner(userId) && isEligibilityCheckDataValidOnUpdate();
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+  }
+}

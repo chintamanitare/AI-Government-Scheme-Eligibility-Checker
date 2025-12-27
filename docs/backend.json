@@ -1,0 +1,145 @@
+{
+  "entities": {
+    "EligibilityCheck": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EligibilityCheck",
+      "type": "object",
+      "description": "Represents a user's eligibility check for government schemes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the EligibilityCheck entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who performed this eligibility check. (Relationship: User 1:N EligibilityCheck)"
+        },
+        "age": {
+          "type": "number",
+          "description": "User's age."
+        },
+        "income": {
+          "type": "string",
+          "description": "User's annual income."
+        },
+        "state": {
+          "type": "string",
+          "description": "User's state of residence."
+        },
+        "category": {
+          "type": "string",
+          "description": "User's category (General, SC, ST, OBC, EWS)."
+        },
+        "occupation": {
+          "type": "string",
+          "description": "User's occupation."
+        },
+        "language": {
+          "type": "string",
+          "description": "User's preferred language."
+        },
+        "aiResponse": {
+          "type": "string",
+          "description": "JSON string containing the AI's response with scheme eligibility details.",
+          "format": "json-string"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the eligibility check was performed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "age",
+        "income",
+        "state",
+        "category",
+        "occupation",
+        "language",
+        "aiResponse",
+        "createdAt"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. This uses path-based ownership for security.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/eligibility_checks/{eligibilityCheckId}",
+        "definition": {
+          "entityName": "EligibilityCheck",
+          "schema": {
+            "$ref": "#/backend/entities/EligibilityCheck"
+          },
+          "description": "Stores eligibility checks performed by a user. This uses path-based ownership and inherits authorization from the user document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "eligibilityCheckId",
+              "description": "The unique identifier for the eligibility check."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. We leverage path-based ownership for user data and eligibility checks, eliminating the need for `get()` calls in security rules. User data is stored under `/users/{userId}`, enabling simple ownership-based security rules. Eligibility checks are stored under `/users/{userId}/eligibility_checks/{eligibilityCheckId}`, inheriting ownership from the user. This design supports atomic operations and makes security rules easily debuggable. This structure also facilitates secure `list` operations because each user's data is segregated into its own subcollection, preventing unauthorized access to other users' data."
+  }
+}
