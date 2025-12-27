@@ -24,14 +24,8 @@ import { indianStates } from '@/lib/states';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 const categories = ['General', 'SC', 'ST', 'OBC', 'EWS'];
-const languages = ['English', 'Hindi', 'Marathi'];
-const incomeRanges = [
-    "Up to ₹1,00,000",
-    "₹1,00,001 - ₹2,50,000",
-    "₹2,50,001 - ₹5,00,000",
-    "₹5,00,001 - ₹8,00,000",
-    "Above ₹8,00,000",
-];
+const languages = ['English', 'Hindi'];
+const occupations = ['Student', 'Farmer', 'Worker', 'Business', 'Other'];
 
 interface EligibilityFormProps {
   onSubmit: (data: EligibilityFormValues) => void;
@@ -73,21 +67,10 @@ export default function EligibilityForm({ onSubmit, isLoading }: EligibilityForm
           name="income"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Annual Income</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your annual income range" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {incomeRanges.map((income) => (
-                    <SelectItem key={income} value={income}>
-                      {income}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Annual Income (in ₹)</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="e.g., 250000" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -149,9 +132,20 @@ export default function EligibilityForm({ onSubmit, isLoading }: EligibilityForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Occupation</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Farmer, Student, Labourer" {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your occupation" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {occupations.map((occ) => (
+                    <SelectItem key={occ} value={occ}>
+                      {occ}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

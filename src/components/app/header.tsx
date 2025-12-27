@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const AshokaChakraIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -21,11 +20,16 @@ export default function AppHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <AshokaChakraIcon className="h-6 w-6 text-primary" />
+          <AshokaChakraIcon className="h-6 w-6 text-secondary" />
           <span className="font-bold sm:inline-block font-headline text-lg">
-            GovScheme AI - Eligibility Checker
+            AI Government Scheme Eligibility Checker
           </span>
         </Link>
+        <div className="flex flex-1 items-center justify-end">
+            <p className="text-sm text-muted-foreground hidden md:block">
+                Know your government benefits in seconds
+            </p>
+        </div>
       </div>
     </header>
   );
