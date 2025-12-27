@@ -48,7 +48,7 @@ export default function SchemesPage() {
               Fill out the form to find central and state government schemes you may be eligible for.
             </p>
           </div>
-          <Card className="shadow-lg border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
+          <Card className="shadow-lg border-2 border-primary/20 bg-card/80 backdrop-blur-sm">
             <CardContent className="p-6">
               <EligibilityForm
                 onSubmit={handleCheckEligibility}

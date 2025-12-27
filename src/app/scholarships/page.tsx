@@ -47,7 +47,7 @@ export default function ScholarshipsPage() {
               Fill out the form to find scholarships tailored to your degree and profile.
             </p>
           </div>
-          <Card className="shadow-lg border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
+          <Card className="shadow-lg border-2 border-primary/20 bg-card/80 backdrop-blur-sm">
             <CardContent className="p-6">
               <ScholarshipForm
                 onSubmit={handleFindScholarships}
