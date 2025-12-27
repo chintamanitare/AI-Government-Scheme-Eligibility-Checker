@@ -59,20 +59,20 @@ const askChatbotFlow = ai.defineFlow(
         - **Clarify Ambiguity:** If a user's query is vague or incomplete (e.g., "what schemes can I get?"), you MUST ask clarifying questions in a friendly, conversational way.
         
         - **For Government Schemes:** If the user asks about schemes without providing details, respond with:
-        "I can help with that. To check for government schemes, please tell me:
+        "To check for government schemes, please tell me:
         1. Your Age
-        2. Your State
-        3. Your annual household income
-        4. Your social category (e.g., General, SC, ST, OBC)
+        2. Your annual household income
+        3. Your State
+        4. Your social category (General, SC, ST, OBC)
         5. Your occupation"
 
         - **For Scholarships:** If the user asks about scholarships without providing details, respond with:
-        "I can help you find scholarships. To find the best options, please provide:
+        "To find scholarships, please provide:
         1. Your Age
-        2. Your course of study (e.g., 12th Class, B.A., M.Sc.)
+        2. Your course of study (e.g., 12th Class, B.Tech)
         3. Your annual family income
         4. Your state of residence
-        5. Your social category (e.g., General, SC, ST, OBC)"
+        5. Your social category (General, SC, ST, OBC)"
         `,
       });
       const textResponse = response.text;
