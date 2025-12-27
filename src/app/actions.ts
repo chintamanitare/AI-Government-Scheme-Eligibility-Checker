@@ -5,7 +5,7 @@ import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/fl
 import { auth, db } from "@/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { headers } from 'next/headers';
-import { Auth, getAuth } from "firebase/auth";
+import { Auth, getAuth, User } from "firebase/auth";
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -22,7 +22,7 @@ export type EligibilityCheckRecord = CheckEligibilityInput & {
 
 // This is a temporary helper function to get the current user on the server.
 // In a production app, this would be handled by a more robust authentication solution.
-async function getCurrentUser() {
+async function getCurrentUser(): Promise<User | null> {
     // This is not a reliable way to get the user on the server.
     // It's a workaround for the hackathon context.
     // A proper implementation would use session management or server-side Firebase Auth.

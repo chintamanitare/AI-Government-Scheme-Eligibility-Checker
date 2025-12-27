@@ -13,61 +13,78 @@ import Link from 'next/link';
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const [checks, setChecks] = React.useState<EligibilityCheckRecord[]>([]);
-  const [selectedCheck, setSelectedCheck] = React.useState<EligibilityResponse | null>(null);
+  const [selectedCheck, setSelectedCheck] = React.useState<EligibilityCheckRecord | null>(null);
+  const [selectedCheckResponse, setSelectedCheckResponse] = React.useState<EligibilityResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   const fetchChecks = React.useCallback(async () => {
-    if (!user) return; // Don't fetch if user is not logged in
+    if (!user) return; 
 
     setIsLoading(true);
     setError(null);
-    const result = await getSavedChecks();
-    if (result.error) {
-      setError(result.error);
-    } else if (result.checks) {
-      setChecks(result.checks);
-      if (result.checks.length > 0) {
-        handleSelectCheck(result.checks[0]);
-      } else {
-        // If there are no checks, make sure we clear the selected check
-        setSelectedCheck(null);
+    try {
+      const result = await getSavedChecks();
+      if (result.error) {
+        setError(result.error);
+        toast({
+            variant: "destructive",
+            title: "Could not fetch saved checks",
+            description: result.error,
+        });
+      } else if (result.checks) {
+        setChecks(result.checks);
+        if (result.checks.length > 0) {
+          handleSelectCheck(result.checks[0]);
+        } else {
+          setSelectedCheck(null);
+          setSelectedCheckResponse(null);
+        }
       }
+    } catch (e: any) {
+        setError("An unexpected error occurred while fetching your checks.");
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "An unexpected error occurred while fetching your checks.",
+        });
+    } finally {
+        setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [user]); // Add user as a dependency
+  }, [user]);
 
   React.useEffect(() => {
-    // When user state is resolved
     if (!isUserLoading) {
       if (user) {
-        // If user is logged in, fetch their checks
         fetchChecks();
       } else {
-        // If no user, stop loading and show sign-in message
         setIsLoading(false);
         setError("Please sign in to view your dashboard.");
-        setChecks([]); // Clear any existing checks
+        setChecks([]);
         setSelectedCheck(null);
+        setSelectedCheckResponse(null);
       }
     }
   }, [user, isUserLoading, fetchChecks]);
 
   const handleSelectCheck = (check: EligibilityCheckRecord) => {
+    setSelectedCheck(check);
     try {
       const aiResponse = JSON.parse(check.aiResponse);
-      setSelectedCheck(aiResponse);
+      setSelectedCheckResponse(aiResponse);
     } catch (e) {
       setError("Failed to parse AI response for the selected check.");
-      setSelectedCheck(null);
+      setSelectedCheckResponse(null);
     }
   };
-
+  
   const renderTimestamp = (check: EligibilityCheckRecord) => {
     if (check.createdAt?.seconds) {
       return format(new Date(check.createdAt.seconds * 1000), 'PPP p');
     }
-    // Handle cases where createdAt might not be a server timestamp yet (local state)
+    if (typeof check.createdAt === 'string') {
+        return format(new Date(check.createdAt), 'PPP p');
+    }
     if (check.createdAt && !check.createdAt.seconds) {
       return 'Saving...'
     }
@@ -91,7 +108,7 @@ export default function DashboardPage() {
             <Card>
               <CardContent className='p-8'>
                 <p className='text-destructive'>{error || "Please sign in to view your dashboard."}</p>
-                <p className='text-muted-foreground'>Sign in to save and review your eligibility checks.</p>
+                <Button asChild variant="link"><Link href="/">Sign in</Link></Button>
               </CardContent>
             </Card>
         </div>
@@ -120,9 +137,11 @@ export default function DashboardPage() {
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
          </div>
       ) : error && !checks.length ? (
-         <div className="text-center">
-            <p className='text-destructive'>{error}</p>
-        </div>
+         <Card>
+            <CardContent className='p-8 text-center'>
+                <p className='text-destructive'>{error}</p>
+            </CardContent>
+         </Card>
       ) : (
         <div className="grid gap-12 lg:grid-cols-5">
             <div className="lg:col-span-2 space-y-4">
@@ -132,7 +151,7 @@ export default function DashboardPage() {
                     <CardDescription>Select a check to view the results.</CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-2'>
-                    {checks.length === 0 ? (
+                    {checks.length === 0 && !isLoading ? (
                         <div className='text-center text-muted-foreground p-4'>
                             <p>You have no saved checks yet.</p>
                             <Button asChild variant="link" className='px-1'>
@@ -143,7 +162,7 @@ export default function DashboardPage() {
                         checks.map(check => (
                             <Button
                                 key={check.id}
-                                variant={selectedCheck === JSON.parse(check.aiResponse) ? 'secondary' : 'outline'}
+                                variant={selectedCheck?.id === check.id ? 'secondary' : 'outline'}
                                 className="w-full justify-start text-left h-auto"
                                 onClick={() => handleSelectCheck(check)}
                             >
@@ -162,7 +181,7 @@ export default function DashboardPage() {
             </Card>
             </div>
             <div className="lg:col-span-3">
-                <ResultsDisplay result={selectedCheck} isLoading={isLoading && !!selectedCheck} error={error && !!selectedCheck ? error : null} />
+                <ResultsDisplay result={selectedCheckResponse} isLoading={isLoading && !!selectedCheck} error={error && !!selectedCheck ? "Failed to load selected check." : null} />
             </div>
         </div>
       )}
