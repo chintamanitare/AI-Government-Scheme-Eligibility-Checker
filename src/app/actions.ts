@@ -1,9 +1,27 @@
 'use server';
 
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
-import { db } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDoc, query, orderBy, getDocs } from "firebase/firestore";
-import { getAuthenticatedUser } from 'genkit/next/auth';
+import { headers } from 'next/headers';
+import {Auth, getAuth} from 'firebase-admin/auth'
+import {initializeApp, getApp, getApps} from 'firebase-admin/app'
+import {ServiceAccount, getServiceAccount} from 'firebase-admin/app'
+
+async function getAuthenticatedUserOnServer() {
+  const anAuth = getAuth(getApp());
+  try {
+    const idToken = headers().get('Authorization')?.split('Bearer ')[1]
+    if (!idToken) {
+      return null;
+    }
+    const decodedToken = await anAuth.verifyIdToken(idToken)
+    return decodedToken;
+  } catch (error) {
+    console.error("Error verifying auth token:", error);
+    return null;
+  }
+}
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -24,7 +42,7 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
     const result = await checkEligibility(input);
 
     try {
-        const user = await getAuthenticatedUser();
+        const user = await getAuthenticatedUserOnServer();
 
         if (user) {
             // Save to user's subcollection if logged in
@@ -41,7 +59,7 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
             console.log("Saved eligibility check for user:", user.uid);
         }
     } catch(authError) {
-        console.error("Error saving eligibility check (auth related):", authError);
+        console.warn("Could not save eligibility check for unauthenticated user.");
         // We can choose to not fail the whole operation if saving fails
     }
 
@@ -56,7 +74,7 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
 
 export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
     try {
-        const user = await getAuthenticatedUser();
+        const user = await getAuthenticatedUserOnServer();
 
         if (!user) {
             return { error: "You must be logged in to view saved checks." };
