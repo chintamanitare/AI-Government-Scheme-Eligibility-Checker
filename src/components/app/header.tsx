@@ -47,7 +47,7 @@ export default function AppHeader() {
           <AshokaChakraIcon className="h-8 w-8" />
           <div className="flex flex-col">
             <span className="text-xl font-bold font-headline">Aadhar Assist AI</span>
-            <span className="text-xs text-muted-foreground">Your Guide to Government Schemes.</span>
+            <span className="text-xs text-muted-foreground">Schemes & Scholarships Guide</span>
           </div>
         </Link>
         

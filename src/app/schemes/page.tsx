@@ -45,7 +45,7 @@ export default function SchemesPage() {
               Government Schemes
             </h1>
             <p className="text-lg text-muted-foreground">
-              Your personal guide to Indian government benefits, powered by AI.
+              Fill out the form to find central and state government schemes you may be eligible for.
             </p>
           </div>
           <Card className="shadow-lg border-2 border-primary/20 bg-background/80 backdrop-blur-sm">

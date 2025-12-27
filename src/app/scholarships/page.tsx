@@ -44,7 +44,7 @@ export default function ScholarshipsPage() {
               Student Scholarships
             </h1>
             <p className="text-lg text-muted-foreground">
-              Find scholarships tailored to your degree and profile.
+              Fill out the form to find scholarships tailored to your degree and profile.
             </p>
           </div>
           <Card className="shadow-lg border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
