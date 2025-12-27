@@ -3,8 +3,7 @@
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDoc, query, orderBy, getDocs } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getApp } from "firebase/app";
+import { auth } from "firebase-admin";
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -25,8 +24,7 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
     const result = await checkEligibility(input);
 
     try {
-        const auth = getAuth(getApp());
-        const user = auth.currentUser;
+        const user = await auth().currentUser;
 
         if (user) {
             // Save to user's subcollection if logged in
@@ -56,8 +54,7 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
 
 export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
     try {
-        const auth = getAuth(getApp());
-        const user = auth.currentUser;
+        const user = await auth().currentUser;
 
         if (!user) {
             return { error: "You must be logged in to view saved checks." };
