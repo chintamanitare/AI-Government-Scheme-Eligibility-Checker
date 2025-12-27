@@ -23,7 +23,8 @@ export const generatePdf = (data: EligibilityReportData) => {
   const addWrappedText = (text: string, x: number, y: number, maxWidth: number) => {
     const lines = doc.splitTextToSize(text, maxWidth);
     doc.text(lines, x, y);
-    return (lines.length || 1) * doc.getLineHeight() / doc.getPointUnit();
+    const dims = doc.getTextDimensions(lines);
+    return dims.h;
   };
 
   // --- Header ---

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SchemeCard from './scheme-card';
 import SchemeCardSkeleton from './scheme-card-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { AlertCircle, FileText, Download, ChevronDown } from 'lucide-react';
+import { AlertCircle, FileText, Download, ChevronDown, Award } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -22,7 +22,7 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({ result, isLoading, error }: ResultsDisplayProps) {
   if (isLoading) {
     return (
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-2 border-primary/10">
         <CardHeader>
           <CardTitle className="text-primary flex items-center gap-2">
             <FileText className="h-6 w-6" />
@@ -51,7 +51,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   if (!result) {
     return (
-        <Card className="shadow-lg bg-transparent border-2 border-dashed">
+        <Card className="shadow-lg bg-background/50 border-2 border-dashed flex items-center justify-center min-h-[500px]">
             <CardContent className="p-12 text-center">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h3 className="mt-4 text-lg font-medium text-foreground">Your Results Will Appear Here</h3>
@@ -77,7 +77,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-2 border-primary/10">
         <CardHeader className="flex flex-row justify-between items-start">
           <div className='space-y-1.5'>
             <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
@@ -85,13 +85,13 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
           {hasResults && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align='end'>
                 <DropdownMenuItem onClick={() => handleDownload('pdf')}>
                   Download as PDF
                 </DropdownMenuItem>
@@ -105,14 +105,17 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
         <CardContent>
           {result.finalAdvice && (
             <div className="mb-6 p-4 bg-primary/10 border-l-4 border-primary rounded-r-lg">
-              <p className="font-semibold text-primary-dark">Final Advice from AI Advisor:</p>
-              <p className="text-foreground">{result.finalAdvice}</p>
+              <p className="font-semibold text-primary-dark flex items-center gap-2">
+                <Award className='h-5 w-5' />
+                AI Advisor's Summary
+              </p>
+              <p className="text-foreground mt-1">{result.finalAdvice}</p>
             </div>
           )}
 
           {eligibleSchemes.length > 0 && (
             <div className='space-y-4'>
-              <h3 className="text-xl font-bold text-accent-dark">Eligible Schemes ({eligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-accent">Eligible Schemes ({eligibleSchemes.length})</h3>
               {eligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}
@@ -121,7 +124,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
           {notEligibleSchemes.length > 0 && (
             <div className='mt-8 space-y-4'>
-              <h3 className="text-xl font-bold">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-muted-foreground/80">Potentially Relevant Schemes ({notEligibleSchemes.length})</h3>
               {notEligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}
