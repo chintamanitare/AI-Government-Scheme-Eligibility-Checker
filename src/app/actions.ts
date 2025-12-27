@@ -3,7 +3,7 @@
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
 import { askChatbot, type AskChatbotInput, type AskChatbotOutput } from "@/ai/flows/ask-chatbot";
 import { initializeServerFirebase } from "@/firebase/server-init";
-import { collection, serverTimestamp, getDocs, query, orderBy, addDoc, doc } from "firebase/firestore";
+import { collection, serverTimestamp, getDocs, query, orderBy, addDoc } from "firebase/firestore";
 
 const { db } = initializeServerFirebase();
 
