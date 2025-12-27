@@ -13,10 +13,14 @@ import { z } from 'genkit';
 
 const AskChatbotInputSchema = z.object({
   query: z.string().describe("The user's question."),
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(),
-  })).describe('The conversation history.'),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'model']),
+        content: z.string(),
+      })
+    )
+    .describe('The conversation history.'),
 });
 export type AskChatbotInput = z.infer<typeof AskChatbotInputSchema>;
 
@@ -33,7 +37,8 @@ export async function askChatbot(input: AskChatbotInput): Promise<AskChatbotOutp
 const chatbotPrompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: AskChatbotInputSchema },
-  output: { schema: AskChatbotOutputSchema },
+  // The output is now a simple string, which is easier for the model to generate.
+  output: { format: 'text' },
   prompt: `You are a helpful and friendly AI assistant for "GovScheme AI", a platform that helps Indian citizens understand and apply for government welfare schemes. Your goal is to answer user questions accurately and concisely based on the provided conversation history.
 
   **Instructions:**
@@ -65,14 +70,23 @@ const askChatbotFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      const { output } = await chatbotPrompt(input);
-      if (!output?.response) {
-        return { response: "I'm sorry, I wasn't able to generate a response. Please try again." };
+      // The prompt now returns a simple string in `response.text`.
+      const response = await chatbotPrompt(input);
+      const textResponse = response.text;
+
+      if (!textResponse) {
+        return {
+          response: "I'm sorry, I wasn't able to generate a response. Please try again.",
+        };
       }
-      return output;
+      // We wrap the string response in the object format the client expects.
+      return { response: textResponse };
     } catch (e: any) {
-      console.error("Error in askChatbotFlow:", e);
-      return { response: "", error: "An error occurred while processing your request." };
+      console.error('Error in askChatbotFlow:', e);
+      return {
+        response: '',
+        error: 'An error occurred while processing your request.',
+      };
     }
   }
 );
