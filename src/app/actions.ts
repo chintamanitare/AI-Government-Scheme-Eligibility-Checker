@@ -1,9 +1,9 @@
 'use server';
 
 import { checkEligibility, type CheckEligibilityInput, type CheckEligibilityOutput } from "@/ai/flows/check-eligibility";
-import { db } from "@/lib/firebase";
+import { db } from "@/firebase";
 import { addDoc, collection, doc, serverTimestamp, getDoc, query, orderBy, getDocs } from "firebase/firestore";
-import { getAuthenticatedUser } from '@genkit-ai/next/auth';
+import { getAuthenticatedUser } from 'genkit/next/auth';
 
 export type Scheme = CheckEligibilityOutput['schemes'][0];
 export type EligibilityResponse = CheckEligibilityOutput | { error: string };
@@ -28,7 +28,9 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
 
         if (user) {
             // Save to user's subcollection if logged in
-            const userChecksCollection = collection(doc(db, "users", user.uid), "eligibility_checks");
+            const userDocRef = doc(db, "users", user.uid);
+            const userChecksCollection = collection(userDocRef, "eligibility_checks");
+            
             const docData = {
                 ...input,
                 userId: user.uid,
@@ -60,7 +62,8 @@ export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord
             return { error: "You must be logged in to view saved checks." };
         }
 
-        const userChecksCollection = collection(doc(db, "users", user.uid), "eligibility_checks");
+        const userDocRef = doc(db, "users", user.uid);
+        const userChecksCollection = collection(userDocRef, "eligibility_checks");
         const q = query(userChecksCollection, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
