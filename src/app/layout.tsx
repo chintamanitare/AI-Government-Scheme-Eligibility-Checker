@@ -25,15 +25,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${ptSans.variable} min-h-screen bg-background font-body antialiased`}>
-        <FirebaseClientProvider>
-          <div className="relative flex min-h-dvh flex-col">
-            <AppHeader />
-            <main className="flex-1">{children}</main>
-            <AppFooter />
-          </div>
-          <Toaster />
-        </FirebaseClientProvider>
+      <body className={ptSans.variable}>
+        <div className="min-h-screen bg-background font-body antialiased">
+          <FirebaseClientProvider>
+            <div className="relative flex min-h-dvh flex-col">
+              <AppHeader />
+              <main className="flex-1">{children}</main>
+              <AppFooter />
+            </div>
+            <Toaster />
+          </FirebaseClientProvider>
+        </div>
       </body>
     </html>
   );
