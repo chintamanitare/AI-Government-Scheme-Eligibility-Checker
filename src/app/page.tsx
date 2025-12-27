@@ -48,7 +48,7 @@ export default function Home() {
               Your personal guide to Indian government benefits, powered by AI.
             </p>
           </div>
-          <Card className="shadow-lg border-2 border-primary/10">
+          <Card className="shadow-lg border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
             <CardContent className="p-6">
               <EligibilityForm
                 onSubmit={handleCheckEligibility}

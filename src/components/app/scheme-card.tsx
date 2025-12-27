@@ -27,7 +27,7 @@ const PriorityBadge = ({ priority }: { priority: 'High' | 'Medium' | 'Low' }) =>
 
 export default function SchemeCard({ scheme }: SchemeCardProps) {
   return (
-    <Card className="bg-card/80 transition-shadow hover:shadow-md">
+    <Card className="bg-card/80 transition-shadow hover:shadow-md hover:border-primary/30 border-border">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
         <div className="space-y-1">
             <CardTitle className="text-lg font-medium">{scheme.schemeName}</CardTitle>
@@ -37,7 +37,7 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
         </div>
         
         {scheme.eligible ? (
-            <span className="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
+            <span className="flex items-center gap-1.5 text-green-500 font-semibold text-sm">
                 <CheckCircle2 className="h-5 w-5" />
                 Eligible
             </span>
@@ -91,7 +91,7 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
         </Accordion>
       </CardContent>
       {scheme.applicationLink && (
-        <CardFooter className="bg-muted/50 py-3 px-6">
+        <CardFooter className="bg-muted/30 py-3 px-6">
             <Button asChild className='w-full' size="sm">
                 <Link href={scheme.applicationLink} target="_blank" rel="noopener noreferrer">
                     Apply Now

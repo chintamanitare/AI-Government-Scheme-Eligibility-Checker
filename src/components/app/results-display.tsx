@@ -22,7 +22,7 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({ result, isLoading, error }: ResultsDisplayProps) {
   if (isLoading) {
     return (
-      <Card className="shadow-xl border-2 border-primary/10">
+      <Card className="shadow-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-primary flex items-center gap-2">
             <FileText className="h-6 w-6" />
@@ -51,7 +51,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   if (!result) {
     return (
-        <Card className="shadow-lg bg-background/50 border-2 border-dashed flex items-center justify-center min-h-[500px]">
+        <Card className="shadow-lg bg-background/50 border-2 border-dashed flex items-center justify-center min-h-[500px] bg-background/80 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h3 className="mt-4 text-lg font-medium text-foreground">Your Results Will Appear Here</h3>
@@ -77,7 +77,7 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-xl border-2 border-primary/10">
+      <Card className="shadow-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm">
         <CardHeader className="flex flex-row justify-between items-start">
           <div className='space-y-1.5'>
             <CardTitle className="text-2xl text-primary font-headline">AI-Powered Eligibility Report</CardTitle>
@@ -104,18 +104,18 @@ export default function ResultsDisplay({ result, isLoading, error }: ResultsDisp
         </CardHeader>
         <CardContent>
           {result.finalAdvice && (
-            <div className="mb-6 p-4 bg-accent border-l-4 border-primary rounded-r-lg">
-              <p className="font-semibold text-accent-foreground flex items-center gap-2">
+            <div className="mb-6 p-4 bg-accent/50 border-l-4 border-primary rounded-r-lg">
+              <p className="font-semibold text-primary flex items-center gap-2">
                 <Award className='h-5 w-5' />
                 AI Advisor's Summary
               </p>
-              <p className="text-foreground mt-1">{result.finalAdvice}</p>
+              <p className="text-foreground/90 mt-1">{result.finalAdvice}</p>
             </div>
           )}
 
           {eligibleSchemes.length > 0 && (
             <div className='space-y-4'>
-              <h3 className="text-xl font-bold text-green-700">Eligible Schemes ({eligibleSchemes.length})</h3>
+              <h3 className="text-xl font-bold text-green-500">Eligible Schemes ({eligibleSchemes.length})</h3>
               {eligibleSchemes.map((scheme, index) => (
                 <SchemeCard key={index} scheme={scheme} />
               ))}
