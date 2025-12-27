@@ -4,14 +4,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import AppHeader from '@/components/app/header';
 import AppFooter from '@/components/app/footer';
-import { PT_Sans } from 'next/font/google';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-
-const ptSans = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-pt-sans',
-});
 
 export const metadata: Metadata = {
   title: 'Aadhar Assist AI - Your Guide to Government Schemes',
@@ -26,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <div className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
+        <div className={cn('min-h-screen bg-background font-body antialiased')}>
           <FirebaseClientProvider>
             <div className="relative flex min-h-dvh flex-col">
               <AppHeader />
