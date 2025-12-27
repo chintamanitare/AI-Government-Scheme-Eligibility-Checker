@@ -34,29 +34,6 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
   try {
     console.log("Checking eligibility for:", input);
     const result = await checkEligibility(input);
-
-    try {
-        const user = await getCurrentUser();
-
-        if (user) {
-            const userDocRef = doc(db, "users", user.uid);
-            const userChecksCollection = collection(userDocRef, "eligibility_checks");
-            
-            const docData = {
-                ...input,
-                userId: user.uid,
-                aiResponse: JSON.stringify(result),
-                createdAt: serverTimestamp(),
-            };
-            await addDoc(userChecksCollection, docData);
-            console.log("Saved eligibility check for user:", user.uid);
-        } else {
-            console.warn("User not authenticated. Eligibility check will not be saved.");
-        }
-    } catch(authError) {
-        console.warn("Could not save eligibility check. User may not be authenticated.", authError);
-    }
-
     console.log("AI response received:", result);
     return result;
   } catch (e: any) {
@@ -65,6 +42,34 @@ export async function getEligibility(input: CheckEligibilityInput): Promise<Elig
     return { error: errorMessage };
   }
 }
+
+export async function saveCheck(input: CheckEligibilityInput, aiResponse: CheckEligibilityOutput): Promise<{success?: boolean, error?: string}> {
+    try {
+        const user = await getCurrentUser();
+
+        if (!user) {
+            return { error: "You must be logged in to save a check." };
+        }
+
+        const userDocRef = doc(db, "users", user.uid);
+        const userChecksCollection = collection(userDocRef, "eligibility_checks");
+        
+        const docData = {
+            ...input,
+            userId: user.uid,
+            aiResponse: JSON.stringify(aiResponse),
+            createdAt: serverTimestamp(),
+        };
+        await addDoc(userChecksCollection, docData);
+        console.log("Saved eligibility check for user:", user.uid);
+        return { success: true };
+
+    } catch(e: any) {
+        console.error("Error saving check:", e);
+        return { error: e.message || "An unknown error occurred while saving the check." };
+    }
+}
+
 
 export async function getSavedChecks(): Promise<{checks?: EligibilityCheckRecord[], error?: string}> {
     try {
