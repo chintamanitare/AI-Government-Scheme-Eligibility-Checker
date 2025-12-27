@@ -36,7 +36,7 @@ export default function EligibilityForm({ onSubmit, isLoading }: EligibilityForm
   const form = useForm<EligibilityFormValues>({
     resolver: zodResolver(eligibilitySchema),
     defaultValues: {
-      age: undefined,
+      age: '' as any,
       income: '',
       state: '',
       category: '',
@@ -55,7 +55,7 @@ export default function EligibilityForm({ onSubmit, isLoading }: EligibilityForm
             <FormItem>
               <FormLabel>Age</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="Enter your age" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} />
+                <Input type="number" placeholder="Enter your age" {...field} onChange={e => field.onChange(e.target.value === '' ? '' : e.target.valueAsNumber)} />
               </FormControl>
               <FormMessage />
             </FormItem>
